@@ -1,6 +1,6 @@
 package gameLogic;
 
-import gameLogic.gameComponents.SolidBody;
+import gameLogic.base.collision_handling.SolidBody;
 import org.junit.Test;
 
 import static org.junit.Assert.*;

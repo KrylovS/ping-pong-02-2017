@@ -1,41 +1,57 @@
 package gameLogic.gameComponents;
 
 
+import gameLogic.base.GeometryOperations;
+import gameLogic.collisionHandling.CircleCollider;
+import gameLogic.event_system.messages.BallState;
+import gameLogic.gameComponents.interfaces.Shapefull;
+import gameLogic.gameComponents.interfaces.Statefull;
 import gameLogic.geometryShapes.Circle;
-import org.apache.commons.math3.linear.ArrayRealVector;
-import org.apache.commons.math3.linear.MatrixUtils;
-import org.apache.commons.math3.linear.RealMatrix;
 import org.apache.commons.math3.linear.RealVector;
 
-public class Ball extends SolidBody {
+
+public class Ball extends GameComponent implements CircleCollider, Shapefull<Circle>, Statefull<BallState> {
     private Circle circle;
 
     public Ball(double radius) {
         super();
-
         circle = new Circle(radius);
     }
 
+    @Override
     public double getRadius() {
         return this.circle.getRadius();
     }
 
-    public void bounce(double[] surfaceNormVec) {
-        final RealVector normVec = new ArrayRealVector(surfaceNormVec);
-        final RealVector normVec0 = normVec.mapDivide(normVec.getNorm());
 
-        final RealMatrix normMatrix = MatrixUtils.createRealMatrix(
-                new double[][]{
-                        {normVec0.getEntry(0) * normVec0.getEntry(0), normVec0.getEntry(0) * normVec0.getEntry(1)},
-                        {normVec0.getEntry(0) * normVec0.getEntry(1), normVec0.getEntry(1) * normVec0.getEntry(1)}
-                }
-        );
+    @Override
+    public Circle getShape() {
+        return circle;
+    }
 
-        final RealMatrix identity = MatrixUtils.createRealIdentityMatrix(2);
-        final RealMatrix transformationMatrix = identity.subtract(normMatrix.scalarMultiply(2));
+    public void bouncePoint(RealVector point, RealVector transportVelocity) {
+        bounceNorm(getPosition().subtract(point), transportVelocity);
+    }
 
-        final double[] newVelocity = transformationMatrix.operate(getVelocity());
+    public void bounceNorm(RealVector normVec, RealVector transportVelocity) {
+        final RealVector normSurfaceVelocity = GeometryOperations
+                .getProjectionMatrix(normVec)
+                .preMultiply(transportVelocity);
+        final RealVector relativeVelocity = velocity.subtract(normSurfaceVelocity);
+        final RealVector newRelativeVelocity = GeometryOperations
+                .getReflectionMatrix(normVec)
+                .preMultiply(relativeVelocity);
+        velocity = transportVelocity.add(newRelativeVelocity);
+    }
 
-        setVelocity(newVelocity);
+    @Override
+    public BallState getState() {
+        return new BallState(velocity, getPosition());
+    }
+
+    @Override
+    public void setState(BallState state) {
+        velocity = state.getVelocity();
+        origin = state.getPosition();
     }
 }

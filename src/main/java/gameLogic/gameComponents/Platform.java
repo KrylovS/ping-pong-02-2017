@@ -1,159 +1,102 @@
 package gameLogic.gameComponents;
 
+import gameLogic.collisionHandling.PolygonObstacle;
+import gameLogic.common.Pair;
+import gameLogic.event_system.messages.PlatformState;
+import gameLogic.gameComponents.interfaces.Polygon;
+import gameLogic.gameComponents.interfaces.Shapefull;
+import gameLogic.gameComponents.interfaces.Statefull;
+import gameLogic.geometryShapes.Line;
+import gameLogic.geometryShapes.Rectangle;
+import org.apache.commons.math3.linear.RealVector;
 
-public class Platform extends SolidBody {
-    private double length;
-    private double width;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+
+
+public class Platform extends GameComponent implements Polygon, PolygonObstacle, Statefull<PlatformState>, Shapefull<Rectangle> {
+    private Rectangle rectangle;
     private boolean isActive;
 
-    private SectorPositionInfo sectorPositionInfo;
-
-    private static class SectorPositionInfo {
-        private double[] originalPosition;
-        private double maxOffset;
-
-        public double[] getOriginalPosition() {
-            return originalPosition;
-        }
-
-        public void setOriginalPosition(double[] originalPosition) {
-            this.originalPosition = originalPosition;
-        }
-
-        public double getMaxOffset() {
-            return maxOffset;
-        }
-
-        public void setMaxOffset(double maxOffset) {
-            this.maxOffset = maxOffset;
-        }
-
-        SectorPositionInfo(double[] originalPosition, double maxOffset) {
-            this.originalPosition = originalPosition;
-            this.maxOffset = maxOffset;
-        }
-
-        SectorPositionInfo() {
-            originalPosition = new double[]{0, 0};
-            maxOffset = Double.POSITIVE_INFINITY;
-        }
-    }
-
     public Platform(double length, double width, boolean isActive) {
-        this.length = length;
-        this.width = width;
+        super();
+        this.rectangle = new Rectangle(length, width);
         this.isActive = isActive;
-        this.sectorPositionInfo = new SectorPositionInfo();
     }
 
     public Platform(double length, double width) {
-        this.length = length;
-        this.width = width;
-        this.isActive = false;
-        this.sectorPositionInfo = new SectorPositionInfo();
+        this(length, width, false);
     }
 
-    public static Platform platformFromTriangleField(
-            TriangleField sector, double relativeDistance, double relativeLength, double width
-    ) {
-
-        final double[] position = sector.toGlobals(
-                new double[]{0, sector.getHeight() * (relativeDistance - 1)}
-        );  // using such coordinates because triangleField coordinate system origin is in the topmost corner.
-
-        final double totalLength = sector.getWidthOnRelativeDistance(relativeDistance);
-
-        final Platform platform = new Platform(totalLength * relativeLength, width);
-        platform.moveTo(position);
-        platform.rotateTo(sector.getAngle());
-
-        platform.updateSectorPositioning(platform.getOrigin(), totalLength * (1 - relativeLength) / 2);
-
-        return platform;
+    public void setActive(boolean isActive) {
+        this.isActive = isActive;
     }
 
-    public void updateSectorPositioning(double[] originalPosition, double maxOffset) {
-        sectorPositionInfo.setOriginalPosition(originalPosition);
-        sectorPositionInfo.setMaxOffset(maxOffset);
-    }
-
-    public double getLength() {
-        return length;
-    }
-
-    public void setLength(double length) {
-        this.length = length;
-    }
-
-    public double getWidth() {
-        return width;
-    }
-
-    public void setWidth(double width) {
-        this.width = width;
-    }
-
-    public boolean isActive() {
+    public boolean getActive() {
         return isActive;
     }
 
-    public void setActive(boolean active) {
-        isActive = active;
+    @Override
+    public PlatformState getState() {
+        return new PlatformState(
+                getPosition(),
+                getRotation(),
+                velocity,
+                isActive
+        );
     }
 
-    public void setActive() {
-        isActive = true;
+    @Override
+    public void setState(PlatformState state) {
+        origin = state.getPosition();
+        angle = state.getAngle();
+        velocity = state.getVelocity();
+        isActive = isActive;
     }
 
-    public void setPassive() {
-        isActive = false;
+    @Override
+    public List<RealVector> getPointArray() {
+        return rectangle.getPointArray().stream()
+                .map(this::toGlobals)
+                .collect(Collectors.toList());
     }
 
-    public double[][] getPointArray() {
-        final double[][] localPoints = new double[][] {
-                {getLeftBorder(), getLowerBorder()},
-                {getRightBorder(), getLowerBorder()},
-                {getRightBorder(), getUpperBorder()},
-                {getLeftBorder(), getUpperBorder()}
-        };
+    public List<Line> getLineArray() {
+        final List<RealVector> pointArray = rectangle.getPointArray().stream()
+                .map(this::toGlobals)
+                .collect(Collectors.toList());
 
-        final double[][] result = new double[localPoints.length][2];
-        for (int i = 0; i != localPoints.length; ++i) {
-            result[i] = toGlobals(localPoints[i]);
-        }
-
-        return result;
+        return IntStream.range(0, pointArray.size()).boxed()
+                .map(i -> new Line(
+                        pointArray.get(i % pointArray.size()),
+                        pointArray.get((i + 1) % pointArray.size())
+                ))
+                .collect(Collectors.toList());
     }
 
-    public double[] getNorm() {
-        return toGlobalsWithoutOffset(new double[]{0, 1});
+    @Override
+    public Rectangle getShape() {
+        return rectangle;
     }
 
-    public boolean inBounceZone(Ball ball) {
-        final double[] localBallPosition = toLocals(ball.getOrigin());
-        final double[] checkPoint = new double[]{
-                localBallPosition[0], localBallPosition[1] - ball.getRadius()
-        };
-
-        if (getLeftBorder() <= checkPoint[0]) if (checkPoint[0] <= getRightBorder())
-            if (getLowerBorder() <= checkPoint[1]) if (checkPoint[1] <= getUpperBorder()) return true;
-        return false;
+    @Override
+    public RealVector getClosestPoint(RealVector referencePoint) {
+        return getLineArray().stream()
+                .map(line -> line.getClosestPoint(referencePoint))
+                .map(point -> new Pair<>(
+                        point,
+                        point.subtract(referencePoint).getNorm()
+                ))
+                .sorted((left, right) -> {
+                        if (left.getSecond() < right.getSecond()) {
+                            return -1;
+                        } else {
+                            return 1;
+                        }
+                })
+                .collect(Collectors.toList())
+                .get(0)
+                .getFirst();
     }
-
-    private double getLeftBorder() {
-        return -length / 2;
-    }
-
-    private double getRightBorder() {
-        return length / 2;
-    }
-
-    private double getLowerBorder() {
-        return -width / 2;
-    }
-
-    private double getUpperBorder() {
-        return width / 2;
-    }
-
 }

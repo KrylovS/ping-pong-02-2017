@@ -3,9 +3,8 @@ package gameLogic.game;
 
 import gameLogic.gameComponents.Ball;
 import gameLogic.gameComponents.Platform;
-import gameLogic.gameComponents.SolidBody;
+import gameLogic.base.collision_handling.SolidBody;
 import gameLogic.gameComponents.TriangleField;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Arrays;
 import java.util.Objects;
