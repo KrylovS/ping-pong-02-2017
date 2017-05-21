@@ -1,7 +1,7 @@
 package gameLogic.gameComponents;
 
-import gameLogic.collisionHandling.CircleCollider;
-import gameLogic.collisionHandling.PolygonObstacle;
+import gameLogic.collisionHandling.interfaces.CircleCollider;
+import gameLogic.collisionHandling.interfaces.PolygonObstacle;
 import gameLogic.gameComponents.interfaces.Area;
 import gameLogic.gameComponents.interfaces.Shapefull;
 import gameLogic.geometryShapes.Line;

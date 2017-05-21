@@ -1,4 +1,4 @@
-package gameLogic.base;
+package gameLogic.base.interfaces;
 
 
 import org.apache.commons.math3.linear.RealVector;

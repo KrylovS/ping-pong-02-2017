@@ -1,5 +1,6 @@
 package gameLogic.collisionHandling;
 
+import gameLogic.collisionHandling.interfaces.PolygonObstacle;
 import org.apache.commons.math3.linear.RealVector;
 
 public class CollisionInfo {

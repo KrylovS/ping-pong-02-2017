@@ -3,7 +3,10 @@ package gameLogic.game;
 
 import gameLogic.collisionHandling.CollisionHandling;
 import gameLogic.collisionHandling.CollisionInfo;
+import gameLogic.collisionHandling.interfaces.PolygonObstacle;
 import gameLogic.common.Pair;
+import gameLogic.config_models.GameConfig;
+import gameLogic.config_models.PlatformConfig;
 import gameLogic.event_system.messages.GameWorldState;
 import gameLogic.gameComponents.*;
 import gameLogic.gameComponents.interfaces.Statefull;
@@ -15,7 +18,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
-import java.util.stream.Stream;
 
 
 public class GameWorld implements Statefull<GameWorldState> {
@@ -33,7 +35,7 @@ public class GameWorld implements Statefull<GameWorldState> {
 
     //TODO add config loading
 
-    private GameComponent lastCollidedObject;
+    private PolygonObstacle lastCollidedObject;
 
     public GameWorld(int userNum, double sectorHeight, double ballRadius) {
         this.userNum = userNum;
@@ -90,12 +92,12 @@ public class GameWorld implements Statefull<GameWorldState> {
     }
 
     public void makeIteration(double time) {
-        double restTime = time;
-        double updateTime = innerMakeIteration(restTime);
+        Double restTime = time;
+        Double updateTime = innerMakeIteration(restTime);
 
-        while (updateTime > 0) {
+        while (updateTime != null) {
             restTime -= updateTime;
-            if (restTime == 0) {
+            if (restTime <= 0) {
                 break;
             }
 
@@ -103,16 +105,16 @@ public class GameWorld implements Statefull<GameWorldState> {
         }
     }
 
-    private double innerMakeIteration(double time) {
-        final double COLLISION_ACCURACY = 2;    //TODO move to config;
+    @Nullable
+    private Double innerMakeIteration(double time) {
         final CollisionInfo platformCollision = CollisionHandling.getNearestCollisionMultiObstacle(
-                ball, platforms, 0, time, ballRadius / COLLISION_ACCURACY
+                ball, platforms, 0, time, ballRadius / GameConfig.PLATFORM_COLLISION_ACCURACY
         );
         final CollisionInfo userSectorCollision = CollisionHandling.getNearestCollisionMultiObstacle(
-                ball, userSectors, 0, time, ballRadius / COLLISION_ACCURACY
+                ball, userSectors, 0, time, ballRadius / GameConfig.SECTOR_COLLISION_ACCURACY
         );
         final CollisionInfo neutralSectorCollision = CollisionHandling.getNearestCollisionMultiObstacle(
-                ball, neutralSectors, 0, time, ballRadius / COLLISION_ACCURACY
+                ball, neutralSectors, 0, time, ballRadius / GameConfig.SECTOR_COLLISION_ACCURACY
         );
 
 
@@ -125,8 +127,36 @@ public class GameWorld implements Statefull<GameWorldState> {
         if (firstCollisionData != null) {
             ball.moveBy(ball.getVelocity().mapMultiply(firstCollisionData.getFirst().getTime()));
 
-            if ()
+            switch (firstCollisionData.getSecond()) {
+                case "platform":
+                    handlePlatformCollision(
+                            firstCollisionData.getFirst().getObstacle(),
+                            ball,
+                            firstCollisionData.getFirst().getDirection()
+                    );
+                    break;
+                case "userSector":
+                    handleUserSectorCollision(
+                            firstCollisionData.getFirst().getObstacle(),
+                            ball,
+                            firstCollisionData.getFirst().getDirection()
+                    );
+                    // todo add event dispatching
+                    break;
+                case "neutralSector":
+                    handleNeutralSectorCollision(
+                            firstCollisionData.getFirst().getObstacle(),
+                            ball,
+                            firstCollisionData.getFirst().getDirection()
+                    );
+                    break;
+            }
+
+            return firstCollisionData.getFirst().getTime();
         }
+
+        ball.moveBy(ball.getVelocity().mapMultiply(time));
+        return null;
     }
 
     @Nullable
@@ -150,28 +180,6 @@ public class GameWorld implements Statefull<GameWorldState> {
 
 
     }
-//
-//        if (firstCollisionData) {
-//            this.ball.moveBy(math.multiply(this.ball.velocity, firstCollisionData.collision.time));
-//
-//            if (firstCollisionData.tag === 'platform') {
-//                this._handlePlatformCollision(
-//                        firstCollisionData.collision.obstacle,
-//                        this.ball,
-//                        firstCollisionData.collision.direction
-//                );
-//            } else if (firstCollisionData.tag === 'userSector') {
-//                this._handleUserSectorCollision(firstCollisionData.collision.obstacle, this.ball);
-//            } else if (firstCollisionData.tag === 'neutralSector') {
-//                this._handleNeutralSectorCollision(firstCollisionData.collision.obstacle, this.ball);
-//            }
-//
-//            return firstCollisionData.collision.time;
-//        }
-//
-//        this.ball.moveBy(math.multiply(this.ball.velocity, time));
-//        return null;
-//    }
 
     private void initSectors() {
         userSectors = IntStream.range(0, userNum).boxed()
@@ -192,40 +200,39 @@ public class GameWorld implements Statefull<GameWorldState> {
     }
 
     private void initPlatforms() {
-        platforms = userSectors.stream().map(sector -> ComponentHelper.platformFromTriangleField(sector));  // TODO get rest of data from config
+        platforms = userSectors.stream()
+                .map(sector -> ComponentHelper.platformFromTriangleField(
+                        sector, PlatformConfig.RELATIVE_DISTANCE, PlatformConfig.RELATIVE_LENGTH, PlatformConfig.ASPECT_RATIO
+                ))
+                .collect(Collectors.toList());
     }
 
     private void initBall() {
         ball = new Ball(ballRadius);
     }
+
+    private void handleUserSectorCollision(PolygonObstacle sector, Ball collidingBall, RealVector norm) {
+        if (!sector.equals(lastCollidedObject)) {
+            collidingBall.bounceNorm(norm, sector.getVelocity());
+            lastCollidedObject = sector;
+
+            //TODO add event dispatching
+        }
+    }
+
+    private void handleNeutralSectorCollision(PolygonObstacle sector, Ball collidingBall, RealVector norm) {
+        if (!sector.equals(lastCollidedObject)) {
+            collidingBall.bounceNorm(norm, sector.getVelocity());
+            lastCollidedObject = sector;
+        }
+    }
+
+    private void handlePlatformCollision(PolygonObstacle platform, Ball collidingBall, RealVector norm) {
+        if (!platform.equals(lastCollidedObject)) {
+            collidingBall.bounceNorm(norm, platform.getVelocity());
+            lastCollidedObject = platform;
+
+            //TODO add event dispatching
+        }
+    }
 }
-
-
-//export class GameWorld implements Drawable, Stateful<GameWorldState> {
-
-//
-//    private _handleUserSectorCollision(sector: TriangleField, ball: Ball) {
-//        if (sector !== this._lastCollidedObject) {
-//            ball.bounceNorm(sector.getBottomNorm());
-//            this._lastCollidedObject = sector;
-//
-//            this.eventBus.dispatchEvent(events.gameEvents.ClientDefeatEvent.create(sector.id));
-//        }
-//    }
-//
-//    private _handleNeutralSectorCollision(sector, ball) {
-//        if (sector !== this._lastCollidedObject) {
-//            ball.bounceNorm(sector.getBottomNorm());
-//            this._lastCollidedObject = sector;
-//        }
-//    }
-//
-//    private _handlePlatformCollision(platform, ball, norm) {
-//        if (platform !== this._lastCollidedObject) {
-//            ball.bounceNorm(norm, platform.velocity);
-//            this._lastCollidedObject = platform;
-//
-//            this.eventBus.dispatchEvent(events.gameEvents.BallBounced.create(platform.id));
-//        }
-//    }
-//}

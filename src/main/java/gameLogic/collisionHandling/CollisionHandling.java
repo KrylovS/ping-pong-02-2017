@@ -1,8 +1,9 @@
 package gameLogic.collisionHandling;
 
 
-import gameLogic.base.ISolidBody;
-import gameLogic.base.SolidBody;
+import gameLogic.base.interfaces.ISolidBody;
+import gameLogic.collisionHandling.interfaces.CircleCollider;
+import gameLogic.collisionHandling.interfaces.PolygonObstacle;
 import gameLogic.common.Pair;
 import org.apache.commons.math3.linear.RealVector;
 import org.jetbrains.annotations.Nullable;

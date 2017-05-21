@@ -1,5 +1,6 @@
 package gameLogic.geometryShapes;
 
+import gameLogic.geometryShapes.interfaces.Rectangular;
 import org.apache.commons.math3.linear.ArrayRealVector;
 import org.apache.commons.math3.linear.RealVector;
 
@@ -10,7 +11,7 @@ import java.util.stream.Collectors;
 /**
  * Created by artem on 5/12/17.
  */
-public class Rectangle {
+public class Rectangle implements Rectangular {
     private double width;
     private double length;
 
@@ -19,6 +20,7 @@ public class Rectangle {
         this.length = length;
     }
 
+    @Override
     public double getWidth() {
         return width;
     }
@@ -27,6 +29,7 @@ public class Rectangle {
         this.width = width;
     }
 
+    @Override
     public double getLength() {
         return length;
     }

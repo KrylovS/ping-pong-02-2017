@@ -1,5 +1,6 @@
 package gameLogic.base;
 
+import gameLogic.base.interfaces.ICoordinateSystem;
 import org.apache.commons.math3.linear.RealVector;
 
 

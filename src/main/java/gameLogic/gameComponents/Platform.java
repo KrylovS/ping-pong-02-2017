@@ -1,6 +1,6 @@
 package gameLogic.gameComponents;
 
-import gameLogic.collisionHandling.PolygonObstacle;
+import gameLogic.collisionHandling.interfaces.PolygonObstacle;
 import gameLogic.common.Pair;
 import gameLogic.event_system.messages.PlatformState;
 import gameLogic.gameComponents.interfaces.Polygon;

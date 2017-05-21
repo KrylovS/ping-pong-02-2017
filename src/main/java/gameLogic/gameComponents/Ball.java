@@ -2,7 +2,7 @@ package gameLogic.gameComponents;
 
 
 import gameLogic.base.GeometryOperations;
-import gameLogic.collisionHandling.CircleCollider;
+import gameLogic.collisionHandling.interfaces.CircleCollider;
 import gameLogic.event_system.messages.BallState;
 import gameLogic.gameComponents.interfaces.Shapefull;
 import gameLogic.gameComponents.interfaces.Statefull;

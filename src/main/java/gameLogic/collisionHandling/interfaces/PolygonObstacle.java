@@ -1,6 +1,6 @@
-package gameLogic.collisionHandling;
+package gameLogic.collisionHandling.interfaces;
 
-import gameLogic.base.ISolidBody;
+import gameLogic.base.interfaces.ISolidBody;
 import org.apache.commons.math3.linear.RealVector;
 
 

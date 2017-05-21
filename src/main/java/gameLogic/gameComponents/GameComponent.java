@@ -67,9 +67,4 @@ public abstract class GameComponent extends SolidBody {
         moveByWithConstraints(offsetVec);
         velocity = velocityVec;
     }
-
-    // TODO add getShape method
 }
-
-//    public abstract get shape(): any
-//}
