@@ -69,7 +69,7 @@ public class UserController {
 
         if(accountService.login(body.getEmail(), body.getPassword())) {
             httpSession.setAttribute("email", body.getEmail());
-            return new ResponseEntity<>(new ResponseWrapper<>(null, body.getLogin()), HttpStatus.OK);
+            return new ResponseEntity<>(new ResponseWrapper<>(null, body), HttpStatus.OK);
         }
         else {
             errorList.add("invalid email or password");
