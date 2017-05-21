@@ -4,5 +4,6 @@ CREATE TABLE IF NOT EXISTS "User" (
   login VARCHAR(256) NOT NULL,
   email VARCHAR(256) UNIQUE NOT NULL,
   password VARCHAR(256) NOT NULL,
-  score INTEGER
+  score INTEGER,
+  rating INTEGER
 );

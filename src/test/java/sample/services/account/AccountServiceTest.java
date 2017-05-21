@@ -179,6 +179,32 @@ public class AccountServiceTest extends UserRelatedTest {
     }
 
     @Test
+    public void testSuccessfullRatingUpdate() {
+        logger.info("Test successful rating update");
+
+        final UserProfile userProfile = getRandomUser();
+        accountService.register(userProfile);
+
+        final int newRating = 100;
+        userProfile.setRating(newRating);
+        final UserProfile newUser = accountService.updateRating(userProfile);
+
+        assertEquals(newUser.getRating(), newRating);
+
+        logger.info("OK");
+    }
+
+    @Test
+    public void testNonExistingUserRatingUpdate() {
+        logger.info("Test non existing user rating update");
+
+        final UserProfile extractedUser = accountService.updateRating(getRandomUser());
+        assertEquals(extractedUser, null);
+
+        logger.info("OK");
+    }
+
+    @Test
     public void testSuccessfulGetLeaders() {
         logger.info("Test successful user extraction");
 
@@ -186,27 +212,27 @@ public class AccountServiceTest extends UserRelatedTest {
         final int startRating = 1000;
         final int ratingStep = 100;
 
-        final List<Integer> scoreList = new ArrayList<>();
+        final List<Integer> ratingList = new ArrayList<>();
         for (int i = maxRating; i > startRating; i -= ratingStep) {
-            scoreList.add(i);
+            ratingList.add(i);
         }
 
-        for (int score : scoreList) {
+        for (int rating : ratingList) {
             final UserProfile userProfile = getRandomUser();
-            userProfile.setScore(score);
+            userProfile.setRating(rating);
             accountService.register(userProfile);
         }
 
-        final List<UserProfile> extractedUsers = accountService.getSortedUsersByScore(scoreList.size());
-        final List<Integer> extractedScores = new ArrayList<>();
+        final List<UserProfile> extractedUsers = accountService.getSortedUsersByRating(ratingList.size());
+        final List<Integer> extractedRatings = new ArrayList<>();
 
         for (UserProfile user : extractedUsers) {
-            extractedScores.add(user.getScore());
+            extractedRatings.add(user.getRating());
         }
 
-        assertEquals(extractedScores.size(), scoreList.size());
-        for (int i = 0; i != extractedScores.size(); ++i) {
-            assertEquals(extractedScores.get(i), scoreList.get(i));
+        assertEquals(extractedRatings.size(), ratingList.size());
+        for (int i = 0; i != extractedRatings.size(); ++i) {
+            assertEquals(extractedRatings.get(i), ratingList.get(i));
         }
 
         logger.info("OK");

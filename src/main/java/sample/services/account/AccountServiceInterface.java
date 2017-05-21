@@ -17,4 +17,7 @@ public interface AccountServiceInterface {
     UserProfile update(@NotNull String email, @NotNull UserProfile changedProfile);
     UserProfile updateScore(@NotNull UserProfile userProfile);
     List<UserProfile> getSortedUsersByScore(int count);
+    UserProfile updateRating(@NotNull UserProfile userProfile);
+    List<UserProfile> getSortedUsersByRating(int count);
+
 }

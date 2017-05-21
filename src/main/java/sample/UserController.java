@@ -148,12 +148,33 @@ public class UserController {
         }
     }
 
+
+    @PostMapping(path = "/api/user/rating")
+    public ResponseEntity<ResponseWrapper> setRating(@RequestBody ObjectNode rating, HttpSession httpSession) {
+        final List<String> errorList = new ArrayList<>();
+        if(isEmptyField(rating.get("rating").toString())) {
+            errorList.add(getEmptyFieldError("rating"));
+            return new ResponseEntity<>(new ResponseWrapper<>(errorList, null), HttpStatus.BAD_REQUEST);
+        }
+
+        if(httpSession.getAttribute("email") != null) {
+            final UserProfile userProfile = accountService.getUser(httpSession.getAttribute("email").toString());
+            userProfile.setRating(rating.get("rating").intValue());
+            accountService.updateRating(userProfile);
+            return new ResponseEntity<>(new ResponseWrapper<>(null, null), HttpStatus.OK);
+        } else {
+            errorList.add("user didn\'t login");
+            return new ResponseEntity<>(new ResponseWrapper<>(errorList, null), HttpStatus.FORBIDDEN);
+
+        }
+    }
+
     @GetMapping(path = "/api/user/leaders/{count}")
     public ResponseEntity<ResponseWrapper<List<UserProfile>>> getLeaders(@PathVariable("count") Integer count) {
         if(count == null || count < 1) {
             count = 1;
         }
-        final List<UserProfile> userProfileArrayList = accountService.getSortedUsersByScore(count);
+        final List<UserProfile> userProfileArrayList = accountService.getSortedUsersByRating(count);
         return new ResponseEntity<>(new ResponseWrapper<>(null, userProfileArrayList), HttpStatus.OK);
     }
 

@@ -12,6 +12,7 @@ public class UserProfile {
     private String password;
     private String login;
     private int score;
+    private int rating;
     private long id;
 
     public UserProfile(UserProfile userProfile) {
@@ -20,6 +21,7 @@ public class UserProfile {
         this.password = userProfile.password;
         this.id = userProfile.id;
         this.score = userProfile.score;
+        this.rating = userProfile.rating;
     }
 
     public UserProfile(@JsonProperty("email") String email, @JsonProperty("login") String login,
@@ -58,6 +60,10 @@ public class UserProfile {
         return score;
     }
 
+    public int getRating() {
+        return rating;
+    }
+
     public void setId(long id) {
         this.id = id;
     }
@@ -76,5 +82,9 @@ public class UserProfile {
 
     public void setScore(int score) {
         this.score = score;
+    }
+
+    public void setRating(int rating) {
+        this.rating = rating;
     }
 }

@@ -36,10 +36,10 @@ public class AccountServiceDB implements AccountServiceInterface {
     @Override
     public UserProfile register(UserProfile userProfile) {
         try {
-            jdbcTemplate.update("INSERT INTO \"User\" (login, email, password, score) values (?, ?, ?, ?) ",
+            jdbcTemplate.update("INSERT INTO \"User\" (login, email, password, score, rating) values (?, ?, ?, ?, ?) ",
                     userProfile.getLogin(), userProfile.getEmail(),
                     encoderService.getPasswordEncoder().encode(userProfile.getPassword()),
-                    userProfile.getScore());
+                    userProfile.getScore(), userProfile.getRating());
             return getUser(userProfile.getEmail());
         } catch (DataAccessException e) {
             logger.log(Level.WARNING, "Exception : ", e);
@@ -87,8 +87,9 @@ public class AccountServiceDB implements AccountServiceInterface {
         updateNotNullFields(userProfile, changedProfile);
 
         try {
-            jdbcTemplate.update("UPDATE \"User\" SET login = ?, email = ?, password = ?, score = ? WHERE id = ?",
-                    userProfile.getLogin(), userProfile.getEmail(), userProfile.getPassword(), userProfile.getScore(), userProfile.getId());
+            jdbcTemplate.update("UPDATE \"User\" SET login = ?, email = ?, password = ?, score = ?, rating = ? WHERE id = ?",
+                    userProfile.getLogin(), userProfile.getEmail(), userProfile.getPassword(), userProfile.getScore(),
+                    userProfile.getRating(), userProfile.getId());
             return getUser(userProfile.getEmail());
         } catch (DataAccessException e) {
             logger.log(Level.WARNING, "Exception : ", e);
@@ -115,6 +116,31 @@ public class AccountServiceDB implements AccountServiceInterface {
     public List<UserProfile> getSortedUsersByScore(int count) {
         try {
             return jdbcTemplate.query("SELECT * FROM \"User\" ORDER BY score DESC LIMIT ?",
+                    new Object[]{count}, USER_MAPPER);
+        } catch (DataAccessException e) {
+            logger.log(Level.WARNING, "Exception : ", e);
+            return null;
+        }
+    }
+
+    @Nullable
+    @Override
+    public UserProfile updateRating(@NotNull UserProfile userProfile) {
+        try {
+            jdbcTemplate.update("UPDATE \"User\" SET rating = ? WHERE LOWER(email) = LOWER(?)",
+                    userProfile.getRating(), userProfile.getEmail());
+            return getUser(userProfile.getEmail());
+        } catch (DataAccessException e) {
+            logger.log(Level.WARNING, "Exception : ", e);
+            return null;
+        }
+    }
+
+    @Nullable
+    @Override
+    public List<UserProfile> getSortedUsersByRating(int count) {
+        try {
+            return jdbcTemplate.query("SELECT * FROM \"User\" ORDER BY rating DESC LIMIT ?",
                     new Object[]{count}, USER_MAPPER);
         } catch (DataAccessException e) {
             logger.log(Level.WARNING, "Exception : ", e);
