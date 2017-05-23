@@ -1,19 +1,28 @@
 package gameLogic.gameComponents;
 
+import gameLogic.collisionHandling.interfaces.CircleCollider;
+import gameLogic.collisionHandling.interfaces.PolygonObstacle;
+import gameLogic.gameComponents.interfaces.Area;
+import gameLogic.gameComponents.interfaces.Shapefull;
+import gameLogic.geometryShapes.Line;
 import gameLogic.geometryShapes.Triangle;
+import org.apache.commons.math3.linear.ArrayRealVector;
+import org.apache.commons.math3.linear.RealVector;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 
-public class TriangleField extends SolidBody {
+public class TriangleField extends GameComponent implements Area, PolygonObstacle, Shapefull<Triangle> {
     private Triangle triangle;
-    private Boolean isNeutral;
-    private Boolean isLoser;
+    private boolean isNeutral;
+    private boolean isLoser;
 
-    public TriangleField(double height, double sectorAngle) {
-        triangle = new Triangle(height, sectorAngle);
-        isNeutral = false;
-        isLoser = false;
-
-        setOrigin(new double[] {0, 0});
+    public TriangleField(double height, double sectorAngle, boolean isNeutral) {
+        super();
+        this.triangle = new Triangle(height, sectorAngle);
+        this.isNeutral = isNeutral;
+        this.isLoser = false;
     }
 
     public double getHeight() {
@@ -24,50 +33,49 @@ public class TriangleField extends SolidBody {
         return triangle.getHalfWidth();
     }
 
-    public double[][] getPointArray() {
-        final double[][] localPoints = triangle.getPointArray();
-
-        final double[][] result = new double[localPoints.length][2];
-        for (int i = 0; i != localPoints.length; ++i) {
-            result[i] = toGlobals(localPoints[i]);
-        }
-
-        return result;
+    @Override
+    public Triangle getShape() {
+        return triangle;
     }
 
-    public double[] getBottomNorm() {
-        return this.toGlobalsWithoutOffset(new double[]{0, 1});
+    public List<RealVector> getPointArray() {
+        return triangle.getPointArray().stream()
+                .map(this::toGlobals)
+                .collect(Collectors.toList());
     }
 
-    public boolean isNeutral() {
+    public RealVector getBottomNorm() {
+        return toGlobalsWithoutOffset(new ArrayRealVector(new double[]{0, 1}));
+    }
+
+    public boolean getNeutral() {
         return isNeutral;
     }
 
-    public boolean isLoser() {
+    public boolean getLoser() {
         return isLoser;
     }
 
-    public void setLoser(boolean value) {
-        isLoser = value;
+    public void setLoser(boolean isLoser) {
+        this.isLoser = isLoser;
     }
 
-    public void setNeutral(boolean value) {
-        isNeutral = value;
+    @Override
+    public boolean containsGlobalPoint(RealVector point) {
+        return triangle.contains(toLocals(point));
     }
 
-    public boolean containsGlobalPoint(double[] point) {
-        return triangle.containsPoint(toLocals(point));
+    public boolean containsLocalPoint(RealVector point) {
+        return triangle.contains(point);
     }
 
-    public boolean containsLocalPoint(double[] point) {
-        return triangle.containsPoint(point);
+    public boolean isInSector(RealVector globalPoint) {
+        return triangle.isInSector(toLocals(globalPoint));
     }
 
-    public boolean reachesBottomLevel(Ball ball) {
-        final double[] localBottomPosition = toLocals(ball.getOrigin());
-        final double ballRadius = ball.getRadius();
-
-        return triangle.getBottomDistance(localBottomPosition) < ballRadius;
+    public boolean reachesBottomLevel(CircleCollider collider) {
+        final RealVector localBallPosition = toLocals(collider.getPosition());
+        return triangle.getBottomDistance(localBallPosition) < collider.getRadius();
     }
 
     public double getWidthOnDistance(double bottomDistance) {
@@ -78,4 +86,13 @@ public class TriangleField extends SolidBody {
         return triangle.getWidthOnDistance(relativeDistance * triangle.getHeight());
     }
 
+    @Override
+    public RealVector getClosestPoint(RealVector referencePoint) {
+        final List<RealVector> globalBasePoints = triangle.getBasePoints().stream()
+                .map(this::toGlobals)
+                .collect(Collectors.toList());
+        final Line baseLine = new Line(globalBasePoints.get(0), globalBasePoints.get(1));
+        return baseLine.getClosestPoint(referencePoint);
+
+    }
 }

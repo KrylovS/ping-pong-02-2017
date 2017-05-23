@@ -1,55 +1,56 @@
 package gameLogic.game;
 
 
-import gameLogic.gameComponents.Ball;
-import gameLogic.gameComponents.Platform;
-import gameLogic.gameComponents.TriangleField;
+import gameLogic.collisionHandling.CollisionHandling;
+import gameLogic.collisionHandling.CollisionInfo;
+import gameLogic.collisionHandling.interfaces.PolygonObstacle;
+import gameLogic.common.Pair;
+import gameLogic.config_models.GameConfig;
+import gameLogic.config_models.PlatformConfig;
+import gameLogic.event_system.messages.GameWorldState;
+import gameLogic.gameComponents.*;
+import gameLogic.gameComponents.interfaces.Statefull;
+import org.apache.commons.math3.linear.RealVector;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 
-public class GameWorld {
+public class GameWorld implements Statefull<GameWorldState> {
+    //TODO add event bus wiring
+
     private int userNum;
     private double sectorAngle;
     private double sectorHeight;
     private double ballRadius;
-    private final double[] worldOrigin = new double[] {0, 0};
-
-    double relativePlatformDistance;
-    double relativePlatformLength;
-    double platformWidth;
-
     private List<TriangleField> userSectors;
     private List<TriangleField> neutralSectors;
-
     private List<Platform> platforms;
 
     private Ball ball;
 
-    public GameWorld(int userNum, double sectorHeight, double ballRadius,
-                     double relativePlatformDistance, double relativePlatformLength,
-                     double platformWidth) {
+    //TODO add config loading
+
+    private PolygonObstacle lastCollidedObject;
+
+    public GameWorld(int userNum, double sectorHeight, double ballRadius) {
         this.userNum = userNum;
         this.sectorAngle = Math.PI / userNum;
         this.sectorHeight = sectorHeight;
         this.ballRadius = ballRadius;
 
-        this.relativePlatformDistance = relativePlatformDistance;
-        this.relativePlatformLength = relativePlatformLength;
-        this.platformWidth = platformWidth;
-
-        userSectors = new ArrayList<>();
-        neutralSectors = new ArrayList<>();
-        platforms = new ArrayList<>();
+        this.userSectors = new ArrayList<>();
+        this.neutralSectors = new ArrayList<>();
+        this.platforms = new ArrayList<>();
+        this.ball = null;
 
         initSectors();
-        initBall();
         initPlatforms();
-    }
-
-    public Ball getBall() {
-        return ball;
+        initBall();
     }
 
     public List<TriangleField> getUserSectors() {
@@ -64,37 +65,175 @@ public class GameWorld {
         return platforms;
     }
 
-    private void initSectors() {
-        for (int i = 0; i != userNum; ++i) {
-            final TriangleField userSector = new TriangleField(sectorHeight, sectorAngle);
-            userSector.setNeutral(false);
-            userSector.rotateTo(2 * i * sectorAngle);
-            userSector.moveTo(worldOrigin);
+    public Ball getBall() {
+        return ball;
+    }
 
-            final TriangleField neutralSector = new TriangleField(sectorHeight, sectorAngle);
-            neutralSector.setNeutral(true);
-            neutralSector.rotateTo((2 * i + 1) * sectorAngle);
-            neutralSector.moveTo(worldOrigin);
+    @Override
+    public GameWorldState getState() {
+        return new GameWorldState(
+                ball.getState(),
+                platforms.stream()
+                        .map(Platform::getState)
+                        .collect(Collectors.toList())
+        );
+    }
 
-            userSectors.add(userSector);
-            neutralSectors.add(neutralSector);
+    @Override
+    public void setState(GameWorldState state) {
+        ball.setState(state.getBallState());
+        IntStream.range(0, platforms.size()).boxed()
+                .forEach(i -> platforms.get(i).setState(state.getPlatformsState().get(i)));
+    }
+
+    public void movePlatform(Platform platform, RealVector localOffsetVec, RealVector velocityVector) {
+        //TODO check if need to delete this method
+        final RealVector globalOffset = platform.toGlobalsWithoutOffset(localOffsetVec);
+        platform.moveByWithConstraints(globalOffset, velocityVector);
+    }
+
+    public void makeIteration(double time) {
+        Double restTime = time;
+        Double updateTime = innerMakeIteration(restTime);
+
+        while (updateTime != null) {
+            restTime -= updateTime;
+            if (restTime <= 0) {
+                break;
+            }
+
+            updateTime = innerMakeIteration(restTime);
         }
     }
 
-    private void initPlatforms() {
-        for (int i = 0; i != userNum; ++i) {
-            platforms.add(
-                    Platform.platformFromTriangleField(
-                            userSectors.get(i), relativePlatformDistance, relativePlatformLength, platformWidth
-                    )
-            );
+    @Nullable
+    private Double innerMakeIteration(double time) {
+        final CollisionInfo platformCollision = CollisionHandling.getNearestCollisionMultiObstacle(
+                ball, platforms, 0, time, ballRadius / GameConfig.PLATFORM_COLLISION_ACCURACY
+        );
+        final CollisionInfo userSectorCollision = CollisionHandling.getNearestCollisionMultiObstacle(
+                ball, userSectors, 0, time, ballRadius / GameConfig.SECTOR_COLLISION_ACCURACY
+        );
+        final CollisionInfo neutralSectorCollision = CollisionHandling.getNearestCollisionMultiObstacle(
+                ball, neutralSectors, 0, time, ballRadius / GameConfig.SECTOR_COLLISION_ACCURACY
+        );
+
+
+        final Pair<CollisionInfo, String> firstCollisionData = getFirstCollision(Arrays.asList(
+                new Pair<>(platformCollision, "platform"),
+                new Pair<>(userSectorCollision, "userSector"),
+                new Pair<>(neutralSectorCollision, "neutralSector")
+        ));
+
+        if (firstCollisionData != null) {
+            ball.moveBy(ball.getVelocity().mapMultiply(firstCollisionData.getFirst().getTime()));
+
+            switch (firstCollisionData.getSecond()) {
+                case "platform":
+                    handlePlatformCollision(
+                            firstCollisionData.getFirst().getObstacle(),
+                            ball,
+                            firstCollisionData.getFirst().getDirection()
+                    );
+                    break;
+                case "userSector":
+                    handleUserSectorCollision(
+                            firstCollisionData.getFirst().getObstacle(),
+                            ball,
+                            firstCollisionData.getFirst().getDirection()
+                    );
+                    // todo add event dispatching
+                    break;
+                case "neutralSector":
+                    handleNeutralSectorCollision(
+                            firstCollisionData.getFirst().getObstacle(),
+                            ball,
+                            firstCollisionData.getFirst().getDirection()
+                    );
+                    break;
+            }
+
+            return firstCollisionData.getFirst().getTime();
         }
+
+        ball.moveBy(ball.getVelocity().mapMultiply(time));
+        return null;
+    }
+
+    @Nullable
+    private Pair<CollisionInfo, String> getFirstCollision(List<Pair<CollisionInfo, String>> pairs) {
+        final List<Pair<CollisionInfo, String>> collisionsData = pairs.stream()
+                .filter(pair -> pair.getFirst() != null)
+                .sorted((left, right) -> {
+                    if (left.getFirst().getTime() < right.getFirst().getTime()) {
+                        return -1;
+                    } else {
+                        return 1;
+                    }
+                })
+                .collect(Collectors.toList());
+
+        if (collisionsData.isEmpty()) {
+            return null;
+        } else {
+            return collisionsData.get(0);
+        }
+
+
+    }
+
+    private void initSectors() {
+        userSectors = IntStream.range(0, userNum).boxed()
+                .map(i -> {
+                    final TriangleField field = new TriangleField(sectorHeight, sectorAngle, false);
+                    field.rotateBy(2 * sectorAngle * i);
+                    return field;
+                })
+                .collect(Collectors.toList());
+
+        neutralSectors = IntStream.range(0, userNum).boxed()
+                .map(i -> {
+                    final TriangleField field = new TriangleField(sectorHeight, sectorAngle, true);
+                    field.rotateBy(sectorAngle * (2 * i + 1));
+                    return field;
+                })
+                .collect(Collectors.toList());
+    }
+
+    private void initPlatforms() {
+        platforms = userSectors.stream()
+                .map(sector -> ComponentHelper.platformFromTriangleField(
+                        sector, PlatformConfig.RELATIVE_DISTANCE, PlatformConfig.RELATIVE_LENGTH, PlatformConfig.ASPECT_RATIO
+                ))
+                .collect(Collectors.toList());
     }
 
     private void initBall() {
         ball = new Ball(ballRadius);
-        //ball.moveTo(worldOrigin);
-        ball.moveTo(new double[] {0, 50});  // TODO remove (debug purpose only)
     }
 
+    private void handleUserSectorCollision(PolygonObstacle sector, Ball collidingBall, RealVector norm) {
+        if (!sector.equals(lastCollidedObject)) {
+            collidingBall.bounceNorm(norm, sector.getVelocity());
+            lastCollidedObject = sector;
+
+            //TODO add event dispatching
+        }
+    }
+
+    private void handleNeutralSectorCollision(PolygonObstacle sector, Ball collidingBall, RealVector norm) {
+        if (!sector.equals(lastCollidedObject)) {
+            collidingBall.bounceNorm(norm, sector.getVelocity());
+            lastCollidedObject = sector;
+        }
+    }
+
+    private void handlePlatformCollision(PolygonObstacle platform, Ball collidingBall, RealVector norm) {
+        if (!platform.equals(lastCollidedObject)) {
+            collidingBall.bounceNorm(norm, platform.getVelocity());
+            lastCollidedObject = platform;
+
+            //TODO add event dispatching
+        }
+    }
 }

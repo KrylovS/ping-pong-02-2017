@@ -30,12 +30,12 @@ public class Message {
         this.content = content;
     }
 
-    public String getStingMessage() {
-        return "\"type\": \"" + this.getType() + "\", " + "\"content\":\""   + this.getContent() + "\"";
-    }
-
     public Message(@NotNull Class clazz, @NotNull String content) {
         this(clazz.getName(), content);
+    }
+
+    public String getStingMessage() {
+        return "\"type\": \"" + this.getType() + "\", " + "\"content\":\""   + this.getContent() + "\"";
     }
 }
 
