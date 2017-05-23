@@ -8,7 +8,7 @@ public class GeometryOperations {
     }
 
     public static RealMatrix getProjectionMatrix(RealVector normVec) {
-        final RealVector normVec0 = normVec.mapDivide(normVec.getNorm());
+        final RealVector normVec0 = normVec.unitVector();
         final double nx = normVec0.getEntry(0);
         final double ny = normVec0.getEntry(1);
 

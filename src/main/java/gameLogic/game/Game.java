@@ -133,11 +133,6 @@ public class Game {
         //clearInterval(this._setIntervalID);
     }
 
-    public void continueGame() {
-        //this._running = true;
-        //this._setIntervalID = setInterval(() => this._makeIteration(this._gameConfig.time), this._gameConfig.time);
-    }
-
     public GameWorldState getWorldState() {
         return world.getState();
     }

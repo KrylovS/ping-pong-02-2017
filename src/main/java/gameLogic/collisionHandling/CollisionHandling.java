@@ -5,6 +5,7 @@ import gameLogic.base.interfaces.ISolidBody;
 import gameLogic.collisionHandling.interfaces.CircleCollider;
 import gameLogic.collisionHandling.interfaces.PolygonObstacle;
 import gameLogic.common.Pair;
+import org.apache.commons.math3.exception.MathArithmeticException;
 import org.apache.commons.math3.linear.RealVector;
 import org.jetbrains.annotations.Nullable;
 
@@ -30,7 +31,7 @@ public class CollisionHandling {
                         getCheckPoints(collider, obstacles.get(i), timeStart, timeFinish, maxStep)
                 ))
                 .map(pair -> {
-                    final CollisionInfo collision = getNearestCollisionSingleObstacle(
+                    final CollisionInfo collision = getNearestCollisionOneObstacle(
                             collider,
                             obstacles.get(pair.getFirst()),
                             pair.getSecond()
@@ -66,7 +67,7 @@ public class CollisionHandling {
 
 
     @Nullable
-    public static CollisionInfo getNearestCollisionSingleObstacle(
+    public static CollisionInfo getNearestCollisionOneObstacle(
             CircleCollider collider,
             PolygonObstacle obstacle,
             List<Double> checkPoints
@@ -95,7 +96,7 @@ public class CollisionHandling {
         final double distance = norm.getNorm();
 
         if (distance <= collider.getRadius()) {
-            return new CollisionInfo(time, closestPoint, norm);
+            return new CollisionInfo(time, closestPoint, norm.unitVector(), obstacle);
         } else {
             return null;
         }
@@ -131,14 +132,12 @@ public class CollisionHandling {
         if (checkPointNum == 0) {
             checkPointArray = new ArrayList<>();
         } else {
-            checkPointArray = IntStream.range(0, checkPointNum)
-                    .asDoubleStream()
-                    .map(index -> begin + range / checkPointNum * (index + 1))
-                    .boxed()
+            checkPointArray = IntStream.range(0, checkPointNum).boxed()
+                    .map(index -> begin + step * (index + 1))
                     .collect(Collectors.toList());
         }
 
-        if (checkPointArray.isEmpty() || checkPointArray.get(0) < end) {
+        if (checkPointArray.isEmpty() || checkPointArray.get(checkPointArray.size() - 1) < end) {
             checkPointArray.add(end);
         }
 

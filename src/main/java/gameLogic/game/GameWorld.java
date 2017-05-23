@@ -87,6 +87,7 @@ public class GameWorld implements Statefull<GameWorldState> {
     }
 
     public void movePlatform(Platform platform, RealVector localOffsetVec, RealVector velocityVector) {
+        //TODO check if need to delete this method
         final RealVector globalOffset = platform.toGlobalsWithoutOffset(localOffsetVec);
         platform.moveByWithConstraints(globalOffset, velocityVector);
     }
