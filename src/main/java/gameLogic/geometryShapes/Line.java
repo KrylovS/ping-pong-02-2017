@@ -16,6 +16,14 @@ public class Line {
         this.coordinateSystem = new CoordinateSystem(startPoint, getAngle());   // TODO check if initializaion is correct
     }
 
+    public RealVector getStartPoint() {
+        return startPoint;
+    }
+
+    public RealVector getEndPoint() {
+        return endPoint;
+    }
+
     public double getAngle() {
         final RealVector direction = endPoint.subtract(startPoint);
         final double dx = direction.getEntry(0);

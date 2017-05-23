@@ -52,7 +52,7 @@ public class Platform extends GameComponent implements Polygon, PolygonObstacle,
         origin = state.getPosition();
         angle = state.getAngle();
         velocity = state.getVelocity();
-        isActive = isActive;
+        isActive = state.isActive();
     }
 
     @Override

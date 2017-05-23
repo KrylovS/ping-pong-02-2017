@@ -25,10 +25,6 @@ public class TriangleField extends GameComponent implements Area, PolygonObstacl
         this.isLoser = false;
     }
 
-    public boolean contains(RealVector point) {
-        return triangle.contains(toLocals(point));
-    }
-
     public double getHeight() {
         return triangle.getHeight();
     }

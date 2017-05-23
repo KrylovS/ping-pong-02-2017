@@ -1,16 +1,20 @@
 package gameLogic.geometryShapes;
 
-
+import gameLogic.TestHelper;
+import org.apache.commons.math3.linear.ArrayRealVector;
+import org.apache.commons.math3.linear.RealVector;
 import org.junit.Before;
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
+import java.util.ArrayList;
+import java.util.List;
+import static org.junit.Assert.*;
 
-public class TriangleTest {
+
+public class TriangleTest extends TestHelper {
     protected Triangle triangle;
     protected final double height = 100;
     protected final double angle = 1;
-    protected final double delta = 0.001;
 
     @Before
     public void setUp() {
@@ -31,21 +35,37 @@ public class TriangleTest {
     @Test
     public void testPointArray() {
         System.out.println("Testing triangle point array creation");
-        final double[][] pointArray = triangle.getPointArray();
+        final List<RealVector> pointArray = triangle.getPointArray();
 
-        final double[][] correctpointArray = new double[][]{
-                {0, 0},
-                {-height * Math.tan(angle / 2), -height},
-                {height * Math.tan(angle / 2), -height}
-        };
+        final List<RealVector> correctPointArray = new ArrayList<>();
+        correctPointArray.add(new ArrayRealVector(new double[]{0, 0}));
+        correctPointArray.add(new ArrayRealVector(new double[]{-height * Math.tan(angle / 2), -height}));
+        correctPointArray.add(new ArrayRealVector(new double[]{height * Math.tan(angle / 2), -height}));
 
-        assertEquals(pointArray.length, correctpointArray.length);
+        assertEquals(pointArray.size(), correctPointArray.size());
 
-        for (int i = 0; i != pointArray.length; ++i) {
-            for (int j = 0; j != pointArray[i].length; ++j) {
-                System.out.println(String.format("i = %d; j = %d", i, j));
-                assertEquals(pointArray[i][j], correctpointArray[i][j], delta);
-            }
+        for (int i = 0; i != pointArray.size(); ++i) {
+            System.out.println(String.format("i = %d;", i));
+            assertTrue(compare(pointArray.get(i), correctPointArray.get(i)));
+        }
+
+        System.out.println("OK");
+    }
+
+    @Test
+    public void testBasePoints() {
+        System.out.println("Testing triangle base points");
+        final List<RealVector> basePoints = triangle.getBasePoints();
+
+        final List<RealVector> correctBasePoints = new ArrayList<>();
+        correctBasePoints.add(new ArrayRealVector(new double[]{-height * Math.tan(angle / 2), -height}));
+        correctBasePoints.add(new ArrayRealVector(new double[]{height * Math.tan(angle / 2), -height}));
+
+        assertEquals(basePoints.size(), correctBasePoints.size());
+
+        for (int i = 0; i != basePoints.size(); ++i) {
+            System.out.println(String.format("i = %d;", i));
+            assertTrue(compare(basePoints.get(i), correctBasePoints.get(i)));
         }
 
         System.out.println("OK");
@@ -65,21 +85,37 @@ public class TriangleTest {
     }
 
     @Test
+    public void testIsInSector() {
+        System.out.println("Testing triangle isInSector");
+
+        final RealVector inSector = new ArrayRealVector(new double[] {0, -triangle.getHeight() * 1000});
+        assertEquals(triangle.isInSector(inSector), true);
+        System.out.println("Correct in sector");
+
+        final RealVector outOfSector = new ArrayRealVector(new double[] {10000, -1000});
+        assertEquals(triangle.isInSector(outOfSector), false);
+        System.out.println("Correct out of sector");
+
+        System.out.println("OK");
+    }
+
+    @Test
     public void testContainsPoint() {
         System.out.println("Testing triangle contains point");
 
-        final double[] innerPoint = new double[] {0, -triangle.getHeight() / 2};
-        assertEquals(triangle.containsPoint(innerPoint), true);
+        final RealVector innerPoint = new ArrayRealVector(new double[] {0, -triangle.getHeight() / 2});
+        assertEquals(triangle.contains(innerPoint), true);
         System.out.println("Correct inner point");
 
-        final double[] outerPoint = new double[] {triangle.getHalfWidth(), 0};
-        assertEquals(triangle.containsPoint(outerPoint), false);
+        final RealVector outerPoint = new ArrayRealVector(new double[] {triangle.getHalfWidth(), 0});
+        assertEquals(triangle.contains(outerPoint), false);
         System.out.println("Correct outer point");
 
-        final double[] boundaryPoint = new double[]{0, 0};
-        assertEquals(triangle.containsPoint(boundaryPoint), true);
+        final RealVector boundaryPoint = new ArrayRealVector(new double[]{0, 0});
+        assertEquals(triangle.contains(boundaryPoint), true);
         System.out.println("Correct boundary point");
 
         System.out.println("OK");
     }
 }
+

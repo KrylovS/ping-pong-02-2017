@@ -20,7 +20,7 @@ public class GeometryOperations {
     }
 
     public static RealMatrix getReflectionMatrix(RealVector normVec) {
-        return MatrixUtils.createRealIdentityMatrix(1).subtract(getProjectionMatrix(normVec));
+        return MatrixUtils.createRealIdentityMatrix(2).subtract(getProjectionMatrix(normVec).scalarMultiply(2));
     }
 
     public static RealMatrix getRotationMatrix(double angle) {

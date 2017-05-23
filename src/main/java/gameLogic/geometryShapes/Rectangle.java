@@ -8,9 +8,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-/**
- * Created by artem on 5/12/17.
- */
+
 public class Rectangle implements Rectangular {
     private double width;
     private double length;

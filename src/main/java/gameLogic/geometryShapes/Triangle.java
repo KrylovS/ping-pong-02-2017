@@ -79,7 +79,7 @@ public class Triangle {
     }
 
     private boolean inHorRange(double x) {
-        return halfWidth <= x && x <= halfWidth;
+        return -halfWidth <= x && x <= halfWidth;
     }
 
     private boolean aboveBottom(double y) {

@@ -46,7 +46,7 @@ public class Ball extends GameComponent implements CircleCollider, Shapefull<Cir
 
     @Override
     public BallState getState() {
-        return new BallState(velocity, getPosition());
+        return new BallState(getPosition(), velocity);
     }
 
     @Override
