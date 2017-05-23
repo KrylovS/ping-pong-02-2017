@@ -133,6 +133,10 @@ public class Game {
         //clearInterval(this._setIntervalID);
     }
 
+    public int getUserNum() {
+        return world.getUserNum();
+    }
+
     public GameWorldState getWorldState() {
         return world.getState();
     }

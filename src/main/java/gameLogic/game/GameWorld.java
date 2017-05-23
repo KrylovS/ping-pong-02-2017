@@ -53,6 +53,10 @@ public class GameWorld implements Statefull<GameWorldState> {
         initBall();
     }
 
+    public int getUserNum() {
+        return userNum;
+    }
+
     public List<TriangleField> getUserSectors() {
         return userSectors;
     }
