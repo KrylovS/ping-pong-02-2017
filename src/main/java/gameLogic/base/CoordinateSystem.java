@@ -56,7 +56,7 @@ public class CoordinateSystem implements ICoordinateSystem {
 
     @Override
     public void rotateTo(double newAngle, ICoordinateSystem rotationOrigin) {
-        final double angularOffset = angle - newAngle;
+        final double angularOffset = newAngle - angle;
         angle = newAngle;
         origin = GeometryOperations.rotate(origin, angularOffset, rotationOrigin.getPosition());
     }

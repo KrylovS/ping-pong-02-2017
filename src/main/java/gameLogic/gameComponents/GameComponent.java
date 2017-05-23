@@ -44,6 +44,7 @@ public abstract class GameComponent extends SolidBody {
     @Override
     public void rotateTo(double newAngle) {
         final double angularOffset = newAngle - angle;
+        angle = newAngle;
         children.forEach(child -> child.rotateBy(angularOffset, this));
     }
 

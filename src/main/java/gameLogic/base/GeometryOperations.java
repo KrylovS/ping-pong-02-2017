@@ -43,7 +43,7 @@ public class GeometryOperations {
 
     public static RealVector rotate(RealVector vector, double angle, RealVector origin) {
         final RealVector offset = vector.subtract(origin);
-        final RealVector newOffset = getInverseRotationMatrix(angle).preMultiply(offset);
+        final RealVector newOffset = getRotationMatrix(angle).preMultiply(offset);
         return origin.add(newOffset);
     }
 
