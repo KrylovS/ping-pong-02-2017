@@ -12,7 +12,6 @@ import javax.naming.AuthenticationException;
 import javax.servlet.http.HttpSession;
 
 import java.io.IOException;
-
 /**
  * Created by sergey on 22.04.17.
  */
@@ -68,6 +67,7 @@ public class GameWebSocketHandler extends TextWebSocketHandler {
         System.out.println("Handle message");
         try {
             message = objectMapper.readValue(text.getPayload(), Message.class);
+            gameSocketService.recievePlayerState(email, message);
             gameSocketService.sendMessageToUser(email, message);
         } catch (IOException ex) {
             System.out.println("wrong json format at ping response" + ex);

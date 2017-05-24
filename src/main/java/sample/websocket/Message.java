@@ -1,16 +1,17 @@
 package sample.websocket;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import org.jetbrains.annotations.NotNull;
 
 /**
  * Created by sergey on 22.04.17.
  */
 @SuppressWarnings("NullableProblems")
-public class Message {
+public class Message<T> {
     @NotNull
     private String type;
     @NotNull
-    private String content;
+    private T content;
 
     @NotNull
     public String getType() {
@@ -18,21 +19,23 @@ public class Message {
     }
 
     @NotNull
-    public String getContent() {
+    public T getContent() {
         return content;
     }
 
     public Message() {
     }
 
-    public Message(@NotNull String type, @NotNull String content) {
+    public Message(@NotNull @JsonProperty("type") String type, @NotNull @JsonProperty("content") T content) {
         this.type = type;
         this.content = content;
     }
 
+    /*
     public Message(@NotNull Class clazz, @NotNull String content) {
         this(clazz.getName(), content);
     }
+    */
 
     public String getStingMessage() {
         return "\"type\": \"" + this.getType() + "\", " + "\"content\":\""   + this.getContent() + "\"";
