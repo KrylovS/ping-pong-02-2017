@@ -29,7 +29,4 @@ public class GameServiceTest {
         assertEquals(gameService.getGamesNumber(), 2);
         logger.info("OK");
     }
-
 }
-
-

@@ -20,8 +20,17 @@ public class Lobby {
     GameService gameService;
 
     public Lobby() {
+        init();
+    }
+
+    public void init() {
         userIdCounter = new AtomicInteger();
         userPartyMap = new ConcurrentHashMap<>();
+    }
+
+    public void reset() {
+        gameService.init();
+        init();
     }
 
     public List<String> getSortedPlayers(int gameIndex) {
