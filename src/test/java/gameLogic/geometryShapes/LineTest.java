@@ -4,12 +4,17 @@ import gameLogic.TestHelper;
 import org.apache.commons.math3.linear.ArrayRealVector;
 import org.apache.commons.math3.linear.RealVector;
 import org.junit.Test;
+
+import java.util.logging.Logger;
+
 import static org.junit.Assert.*;
 
 public class LineTest extends TestHelper {
+    private final Logger logger = Logger.getLogger(LineTest.class.getName());
+
     @Test
     public void testGetAngle() {
-        System.out.println("Testing Line.getAngle()");
+        logger.info("Testing Line.getAngle()");
         final double angle = Math.toRadians(30);
         final Line line = new Line(
                 new ArrayRealVector(new double[]{0, 0}),
@@ -17,24 +22,24 @@ public class LineTest extends TestHelper {
         );
 
         assertEquals(line.getAngle(), angle, delta);
-        System.out.println("OK");
+        logger.info("OK");
     }
 
     @Test
     public void testGetLength() {
-        System.out.println("Testing Line.getLength()");
+        logger.info("Testing Line.getLength()");
         final Line line = new Line(
                 new ArrayRealVector(new double[]{0, 0}),
                 new ArrayRealVector(new double[]{0, 1})
         );
 
         assertEquals(line.getLength(), 1, delta);
-        System.out.println("OK");
+        logger.info("OK");
     }
 
     @Test
     public void testGetClosestPoint() {
-        System.out.println("Testing Line.getClosestPoint()");
+        logger.info("Testing Line.getClosestPoint()");
         final RealVector start = new ArrayRealVector(new double[]{0, 0});
         final RealVector finish = new ArrayRealVector(new double[]{1, 0});
         final RealVector mid = new ArrayRealVector(new double[]{0.5, 0});
@@ -49,18 +54,18 @@ public class LineTest extends TestHelper {
         final RealVector rightPoint = new ArrayRealVector(new double[]{2, 1});
 
         assertTrue(compare(line.getClosestPoint(leftPoint), start));
-        System.out.println("OK left");
+        logger.info("OK left");
         assertTrue(compare(line.getClosestPoint(midPoint), mid));
-        System.out.println("OK mid");
+        logger.info("OK mid");
         assertTrue(compare(line.getClosestPoint(rightPoint), finish));
-        System.out.println("OK right");
+        logger.info("OK right");
 
-        System.out.println("OK");
+        logger.info("OK");
     }
 
     @Test
     public void testGetNorm() {
-        System.out.println("Testing Line normal vectors");
+        logger.info("Testing Line normal vectors");
         final RealVector start = new ArrayRealVector(new double[]{0, 0});
         final RealVector finish = new ArrayRealVector(new double[]{1, 1});
 
@@ -74,10 +79,10 @@ public class LineTest extends TestHelper {
         final RealVector negativeNorm = posiitveNorm.mapMultiply(-1);
 
         assertTrue(compare(line.getPositiveNorm(), posiitveNorm));
-        System.out.println("OK positive");
+        logger.info("OK positive");
         assertTrue(compare(line.getNegativeNorm(), negativeNorm));
-        System.out.println("OK negative");
+        logger.info("OK negative");
 
-        System.out.println("OK");
+        logger.info("OK");
     }
 }

@@ -3,6 +3,7 @@ package gameLogic.gameComponents;
 import static org.junit.Assert.*;
 
 import gameLogic.TestHelper;
+import gameLogic.base.CoordinateSystemTest;
 import gameLogic.event_system.messages.PlatformState;
 import gameLogic.geometryShapes.Line;
 import org.apache.commons.math3.linear.ArrayRealVector;
@@ -11,14 +12,17 @@ import org.junit.Test;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 
-public class PlatormTest extends TestHelper {
+public class PlatformTest extends TestHelper {
+    private final Logger logger = Logger.getLogger(PlatformTest.class.getName());
+
     @Test
     public void testPointArray() {
-        System.out.println("Testing Platform pointArray");
+        logger.info("Testing Platform pointArray");
 
         final double length = 10;
         final double width = 1;
@@ -38,16 +42,16 @@ public class PlatormTest extends TestHelper {
                 .collect(Collectors.toList());
 
         for (int i = 0; i != points.size(); ++i) {
-            System.out.println(String.format("i = %d;", i));
+            logger.info(String.format("i = %d;", i));
             assertTrue(compare(points.get(i), correctPoints.get(i)));
         }
 
-        System.out.println("OK");
+        logger.info("OK");
     }
 
     @Test
     public void testLineArray() {
-        System.out.println("Testing Platform lineArray");
+        logger.info("Testing Platform lineArray");
 
         final double length = 10;
         final double width = 1;
@@ -66,7 +70,7 @@ public class PlatormTest extends TestHelper {
                 .collect(Collectors.toList());
 
         for (int i = 0; i != points.size(); ++i) {
-            System.out.println(String.format("i = %d;", i));
+            logger.info(String.format("i = %d;", i));
             assertTrue(compare(
                     lines.get(i).getStartPoint(),
                     correctLines.get(i).getStartPoint()
@@ -78,12 +82,12 @@ public class PlatormTest extends TestHelper {
             ));
         }
 
-        System.out.println("OK");
+        logger.info("OK");
     }
 
     @Test
     public void testGetClosestPoint() {
-        System.out.println("Testing Platform getClosestPoint");
+        logger.info("Testing Platform getClosestPoint");
 
         final double length = 10;
         final Platform platform = new Platform(length, length);
@@ -117,12 +121,12 @@ public class PlatormTest extends TestHelper {
                         i -> assertTrue(compare(closestPoints.get(i), correctClosestPoints.get(i)))
                 );
 
-        System.out.println("OK");
+        logger.info("OK");
     }
 
     @Test
     public void testStateLoading() {
-        System.out.println("Testing Platform stateLoading");
+        logger.info("Testing Platform stateLoading");
         final double length = 10;
         final Platform platform = new Platform(length, length);
 
@@ -139,12 +143,12 @@ public class PlatormTest extends TestHelper {
         assertTrue(compare(platform.getRotation(), platformState.getAngle()));
         assertTrue(compare(platform.getVelocity(), platformState.getVelocity()));
         assertEquals(platform.getActive(), platformState.isActive());
-        System.out.println("OK");
+        logger.info("OK");
     }
 
     @Test
     public void testStateExtraction() {
-        System.out.println("Testing Platform stateExtraction");
+        logger.info("Testing Platform stateExtraction");
         final double length = 10;
         final Platform platform = new Platform(length, length);
 
@@ -163,7 +167,7 @@ public class PlatormTest extends TestHelper {
         assertTrue(compare(actualState.getAngle(), platformState.getAngle()));
         assertTrue(compare(actualState.getVelocity(), platformState.getVelocity()));
         assertEquals(actualState.isActive(), platformState.isActive());
-        System.out.println("OK");
+        logger.info("OK");
     }
 
 }

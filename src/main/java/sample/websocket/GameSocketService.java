@@ -1,15 +1,18 @@
 package sample.websocket;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import gameLogic.config_models.GameConfig;
 import gameLogic.event_system.messages.GameWorldState;
+import gameLogic.event_system.messages.PlatformState;
 import org.eclipse.jetty.websocket.api.WebSocketException;
 import org.jetbrains.annotations.NotNull;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
-import sample.Lobbi;
+import sample.Lobby;
+import sample.services.game.GameService;
 
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
@@ -17,6 +20,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.logging.Logger;
+import java.util.stream.IntStream;
 
 
 /**
@@ -25,10 +32,14 @@ import java.util.concurrent.ConcurrentHashMap;
 @Service
 public class GameSocketService
 {
+    private final Logger logger = Logger.getLogger(GameSocketService.class.getName());
     private Map<String, WebSocketSession> sessions = new ConcurrentHashMap<>();
     //private ObjectMapper objectMapper = new ObjectMapper();
 
-    private final Lobbi lobbi = new Lobbi();
+    @Autowired
+    private Lobby lobby;
+    @Autowired
+    private GameService gameService;
 
     public void registerUser(@NotNull String email, @NotNull WebSocketSession webSocketSession) {
         sessions.put(email, webSocketSession);
@@ -65,30 +76,36 @@ public class GameSocketService
             //noinspection ConstantConditions
             webSocketSession.sendMessage(new TextMessage(message.getStingMessage()));
         } catch (JsonProcessingException | WebSocketException e) {
-            throw new IOException("Unnable to send message", e);
+            throw new IOException("Unable to send message", e);
         }
     }
 
-    public void addUserInGame(HttpSession httpSession, @NotNull String email) {
-        final Integer partyId = lobbi.addPlayerAndReturnPartyId(email);
-        final Integer playerId = lobbi.getPlayerIdInParty(email, partyId);
+    public void addUserToGame(HttpSession httpSession, @NotNull String email) {
+        final Integer partyId = lobby.addPlayer(email);
+        final Integer playerId = lobby.getPlayerPartyId(email, partyId);
         httpSession.setAttribute("partyId", partyId);
         httpSession.setAttribute("playerId", playerId);
     }
 
     public void recievePlayerState(String email, Message<?> message) {
         final WebSocketSession webSocketSession = sessions.get(email);
+
+        final PlatformState platformState = (PlatformState) message.getContent();
         final Integer partyId = (Integer) webSocketSession.getAttributes().get("partyId");
         final Integer playerId = (Integer) webSocketSession.getAttributes().get("playerId");
 
+        gameService.addUserTask(partyId, playerId, platformState);
     }
 
-    public void updateGamePartyState(Integer partyId, List<GameWorldState> gameWorldStates) throws IOException {
-        Message<List<GameWorldState>> message = new Message<>("state", gameWorldStates);
-        List <String> playersList = new ArrayList<>();
-        for (String player : playersList) {
-            sendMessageToUser(player, message);
-        }
+    public void updateGamePartyState(Integer partyId, List<GameWorldState> gameWorldStates) {
+        final List<String> players = lobby.getSortedPlayers(partyId);
 
+        IntStream.range(0, GameConfig.PLAYERS_NUM).forEach(i -> {
+            try {
+                sendMessageToUser(players.get(i), new Message<>("state", gameWorldStates.get(i)));
+            } catch (IOException e) {
+                logger.warning(e.getMessage());
+            }
+        });
     }
 }

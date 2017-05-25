@@ -2,6 +2,7 @@ package gameLogic.game;
 
 import gameLogic.TestHelper;
 import gameLogic.base.CoordinateSystem;
+import gameLogic.base.CoordinateSystemTest;
 import gameLogic.gameComponents.Ball;
 import gameLogic.gameComponents.Platform;
 import gameLogic.gameComponents.TriangleField;
@@ -11,6 +12,7 @@ import org.junit.Test;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import static org.junit.Assert.*;
 
@@ -20,13 +22,15 @@ public class GameWorldTest extends TestHelper {
     public static final int SECTOR_HEIGHT = 50;
     public static final int BALL_RADIUS = 5;
 
+    private final Logger logger = Logger.getLogger(CoordinateSystemTest.class.getName());
+
     private GameWorld getNewWorld() {
         return new GameWorld(USER_NUM, SECTOR_HEIGHT, BALL_RADIUS);
     }
 
     @Test
     public void testGetUserSectors() {
-        System.out.println("Testing GameWorld.GetUserSectors");
+        logger.info("Testing GameWorld.GetUserSectors");
         final GameWorld world = getNewWorld();
         final List<TriangleField> userSectors = world.getUserSectors();
         final List<Double> angles = userSectors.stream()
@@ -37,12 +41,12 @@ public class GameWorldTest extends TestHelper {
         for (int i = 0; i != correctAngles.size(); ++i) {
             assertEquals(angles.get(i), correctAngles.get(i), delta);
         }
-        System.out.println("OK");
+        logger.info("OK");
     }
 
     @Test
     public void testGetNeutralSectors() {
-        System.out.println("Testing GameWorld.GetNeutralSectors");
+        logger.info("Testing GameWorld.GetNeutralSectors");
         final GameWorld world = getNewWorld();
         final List<TriangleField> neutralSectors = world.getNeutralSectors();
         final List<Double> angles = neutralSectors.stream()
@@ -53,12 +57,12 @@ public class GameWorldTest extends TestHelper {
         for (int i = 0; i != correctAngles.size(); ++i) {
             assertEquals(angles.get(i), correctAngles.get(i), delta);
         }
-        System.out.println("OK");
+        logger.info("OK");
     }
 
     @Test
     public void testGetPlatforms() {
-        System.out.println("Testing GameWorld.GetPlatforms");
+        logger.info("Testing GameWorld.GetPlatforms");
         final GameWorld world = getNewWorld();
         final List<Platform> platform = world.getPlatforms();
         final List<Double> angles = platform.stream()
@@ -69,23 +73,23 @@ public class GameWorldTest extends TestHelper {
         for (int i = 0; i != correctAngles.size(); ++i) {
             assertEquals(angles.get(i), correctAngles.get(i), delta);
         }
-        System.out.println("OK");
+        logger.info("OK");
     }
 
     @Test
     public void testBallInitialPosition() {
-        System.out.println("Testing ball initial position");
+        logger.info("Testing ball initial position");
         final GameWorld world = getNewWorld();
 
         final Ball ball = world.getBall();
         assertTrue(compare(ball.getPosition(), new ArrayRealVector(new double[]{0, 0})));
 
-        System.out.println("OK");
+        logger.info("OK");
     }
 
     @Test
     public void testBallMove() {
-        System.out.println("Testing ball move");
+        logger.info("Testing ball move");
         final GameWorld world = getNewWorld();
         final RealVector ballVelocity = new ArrayRealVector(new double[]{100, 0});
         world.getBall().setVelocity(ballVelocity);
@@ -98,13 +102,13 @@ public class GameWorldTest extends TestHelper {
 
         assertTrue(compare(ballPosition, correctBallPosition));
 
-        System.out.println("OK");
+        logger.info("OK");
     }
 
     @Test
     public void testBallCollide() {
         // TODO may be need to make more exhaustive test
-        System.out.println("Testing ball collide");
+        logger.info("Testing ball collide");
         final GameWorld world = getNewWorld();
         final RealVector ballVelocity = new ArrayRealVector(new double[]{0, -38});
         world.getBall().setVelocity(ballVelocity);
@@ -118,7 +122,7 @@ public class GameWorldTest extends TestHelper {
 
         assertTrue(compare(newBallVelocity, correctNewBallVelocity));
 
-        System.out.println("OK");
+        logger.info("OK");
     }
 
 }

@@ -6,13 +6,17 @@ import org.apache.commons.math3.linear.ArrayRealVector;
 import org.apache.commons.math3.linear.RealVector;
 import org.junit.Test;
 
+import java.util.logging.Logger;
+
 import static org.junit.Assert.*;
 
 
 public class TriangleFieldTest extends TestHelper {
+    private final Logger logger = Logger.getLogger(TriangleFieldTest.class.getName());
+
     @Test
     public void testGetBottomNorm() {
-        System.out.println("Testing TriangleField.getBottomNorm");
+        logger.info("Testing TriangleField.getBottomNorm");
         final TriangleField sector = new TriangleField(100, Math.PI / 2, true);
         sector.rotateBy(Math.PI / 4);
 
@@ -22,23 +26,23 @@ public class TriangleFieldTest extends TestHelper {
                 .preMultiply(new ArrayRealVector(new double[]{0, 1}));
 
         assertTrue(compare(bottomNorm, correctBottomNorm));
-        System.out.println("OK");
+        logger.info("OK");
     }
 
     @Test
     public void testReachesBottomLevel() {
-        System.out.println("Testing TriangleField.reachesBottomLevel");
+        logger.info("Testing TriangleField.reachesBottomLevel");
         final TriangleField sector = new TriangleField(100, Math.PI / 2, true);
         final Ball ball = new Ball(20);
 
         ball.moveTo(new ArrayRealVector(new double[]{0, -90}));
         assertTrue(sector.reachesBottomLevel(ball));
-        System.out.println("Reached OK");
+        logger.info("Reached OK");
 
         ball.moveTo(new ArrayRealVector(new double[]{0, 0}));
         assertFalse(sector.reachesBottomLevel(ball));
-        System.out.println("Not reached OK");
+        logger.info("Not reached OK");
 
-        System.out.println("OK");
+        logger.info("OK");
     }
 }

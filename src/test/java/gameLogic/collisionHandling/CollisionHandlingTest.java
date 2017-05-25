@@ -1,9 +1,7 @@
-package collisionHandling;
+package gameLogic.collisionHandling;
 
 import gameLogic.TestHelper;
 import gameLogic.base.interfaces.ISolidBody;
-import gameLogic.collisionHandling.CollisionHandling;
-import gameLogic.collisionHandling.CollisionInfo;
 import gameLogic.collisionHandling.interfaces.CircleCollider;
 import gameLogic.collisionHandling.interfaces.PolygonObstacle;
 import gameLogic.gameComponents.Ball;
@@ -13,13 +11,17 @@ import org.junit.Test;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.logging.Logger;
+
 import static org.junit.Assert.*;
 
 
 public class CollisionHandlingTest extends TestHelper {
+    private final Logger logger = Logger.getLogger(CollisionHandling.class.getName());
+
     @Test
     public void testArange() {
-        System.out.println("Testing arange");
+        logger.info("Testing arange");
         final double begin = 0;
         final double end = 10;
         final double step = 3;
@@ -31,12 +33,12 @@ public class CollisionHandlingTest extends TestHelper {
         for (int i = 0; i != arange.size(); ++i) {
             assertEquals(arange.get(i), correctArange.get(i), delta);
         }
-        System.out.println("OK");
+        logger.info("OK");
     }
 
     @Test
     public void testDivideTime() {
-        System.out.println("Testing divide time");
+        logger.info("Testing divide time");
         final double pathLength = 100;
         final double timeStart = 0;
         final double timeFinish = 10;
@@ -49,12 +51,12 @@ public class CollisionHandlingTest extends TestHelper {
         for (int i = 0; i != checkPoints.size(); ++i) {
             assertEquals(checkPoints.get(i), correctCheckPoints.get(i), delta);
         }
-        System.out.println("OK");
+        logger.info("OK");
     }
 
     @Test
     public void testGetCheckPoints() {
-        System.out.println("Testing get checkpoints");
+        logger.info("Testing get checkpoints");
         final ISolidBody body1 = new Ball(10);
         body1.setVelocity(new ArrayRealVector(new double[]{5, 0}));
 
@@ -72,12 +74,12 @@ public class CollisionHandlingTest extends TestHelper {
         for (int i = 0; i != checkPoints.size(); ++i) {
             assertEquals(checkPoints.get(i), correctCheckPoints.get(i), delta);
         }
-        System.out.println("OK");
+        logger.info("OK");
     }
 
     @Test
     public void testGetCollision() {
-        System.out.println("Testing getCollision");
+        logger.info("Testing getCollision");
 
         final CircleCollider collider = new Ball(10);
         final PolygonObstacle obstacle = new Platform(10, 10);
@@ -87,7 +89,7 @@ public class CollisionHandlingTest extends TestHelper {
 
         final CollisionInfo failedCollision = CollisionHandling.getCollision(collider, obstacle, 1);
         assertNull(failedCollision);
-        System.out.println("Collision failed OK");
+        logger.info("Collision failed OK");
 
         collider.setVelocity(new ArrayRealVector(new double[]{100, 0}));
         final CollisionInfo successCollision = CollisionHandling.getCollision(collider, obstacle, 0.095);
@@ -96,14 +98,14 @@ public class CollisionHandlingTest extends TestHelper {
         assertTrue(compare(
                 successCollision.getDirection().projection(new ArrayRealVector(new double[]{0, 1})).getNorm(),
                 0));
-        System.out.println("Collision success OK");
+        logger.info("Collision success OK");
 
-        System.out.println("OK");
+        logger.info("OK");
     }
 
     @Test
     public void testGetNearestCollisionOneObstacle() {
-        System.out.println("Testing getNearestCollisionOneObstacle");
+        logger.info("Testing getNearestCollisionOneObstacle");
 
         final CircleCollider collider = new Ball(10);
         final PolygonObstacle obstacle = new Platform(10, 10);
@@ -115,7 +117,7 @@ public class CollisionHandlingTest extends TestHelper {
                 collider, obstacle, Arrays.asList(0., 0.1, 0.5)
         );
         assertNull(failedCollision);
-        System.out.println("Collision failed OK");
+        logger.info("Collision failed OK");
 
 
         collider.setVelocity(new ArrayRealVector(new double[]{100, 0}));
@@ -123,17 +125,17 @@ public class CollisionHandlingTest extends TestHelper {
         final CollisionInfo successCollision = CollisionHandling.getNearestCollisionOneObstacle(
                 collider, obstacle, Arrays.asList(firstCollisionTime, firstCollisionTime + 0.01, firstCollisionTime + 0.02)
         );
-        System.out.println("Collision success OK");
+        logger.info("Collision success OK");
 
         assertNotNull(successCollision);
         assertEquals(successCollision.getTime(), firstCollisionTime, delta);
 
-        System.out.println("OK");
+        logger.info("OK");
     }
 
     @Test
     public void testGetNearestCollisionMultiObstacle() {
-        System.out.println("Testing getNearestCollisionOneObstacle");
+        logger.info("Testing getNearestCollisionOneObstacle");
 
         final CircleCollider collider = new Ball(10);
         final PolygonObstacle obstacle1 = new Platform(10, 10);
@@ -151,6 +153,6 @@ public class CollisionHandlingTest extends TestHelper {
 
         assertNotNull(collisionInfo);
         assertEquals(collisionInfo.getObstacle(), obstacle1);
-        System.out.println("OK");
+        logger.info("OK");
     }
 }

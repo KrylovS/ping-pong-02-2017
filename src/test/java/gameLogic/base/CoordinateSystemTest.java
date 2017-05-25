@@ -4,13 +4,18 @@ import gameLogic.TestHelper;
 import org.apache.commons.math3.linear.ArrayRealVector;
 import org.apache.commons.math3.linear.RealVector;
 import org.junit.Test;
+
+import java.util.logging.Logger;
+
 import static org.junit.Assert.*;
 
 
 public class CoordinateSystemTest extends TestHelper {
+    private final Logger logger = Logger.getLogger(CoordinateSystemTest.class.getName());
+
     @Test
     public void testMoveBy() {
-        System.out.println("Testing coordinate system move by");
+        logger.info("Testing coordinate system move by");
 
         final CoordinateSystem coordinateSystem = new CoordinateSystem();
         final RealVector offset = new ArrayRealVector(new double[]{10, 20});
@@ -20,12 +25,12 @@ public class CoordinateSystemTest extends TestHelper {
 
         assertTrue(compare(coordinateSystem.getPosition(), offset.mapMultiply(2)));
 
-        System.out.println("OK");
+        logger.info("OK");
     }
 
     @Test
     public void testMoveTo() {
-        System.out.println("Testing coordinate system move to");
+        logger.info("Testing coordinate system move to");
 
         final CoordinateSystem coordinateSystem = new CoordinateSystem();
         final RealVector newPos = new ArrayRealVector(new double[]{10, 20});
@@ -35,12 +40,12 @@ public class CoordinateSystemTest extends TestHelper {
 
         assertTrue(compare(coordinateSystem.getPosition(), newPos));
 
-        System.out.println("OK");
+        logger.info("OK");
     }
 
     @Test
     public void testRotateBy() {
-        System.out.println("Testing coordinate system rotate by");
+        logger.info("Testing coordinate system rotate by");
 
         final CoordinateSystem coordinateSystem = new CoordinateSystem();
         final double angularOffset = 1;
@@ -50,12 +55,12 @@ public class CoordinateSystemTest extends TestHelper {
 
         assertEquals(coordinateSystem.getRotation(), angularOffset * 2, delta);
 
-        System.out.println("OK");
+        logger.info("OK");
     }
 
     @Test
     public void testRotateTo() {
-        System.out.println("Testing coordinate system rotate to");
+        logger.info("Testing coordinate system rotate to");
 
         final CoordinateSystem coordinateSystem = new CoordinateSystem();
         final double newAngle = 1;
@@ -65,12 +70,12 @@ public class CoordinateSystemTest extends TestHelper {
 
         assertEquals(coordinateSystem.getRotation(), newAngle, delta);
 
-        System.out.println("OK");
+        logger.info("OK");
     }
 
     @Test
     public void testRotateByWithOrigin() {
-        System.out.println("Testing coordinate system rotate by with origin");
+        logger.info("Testing coordinate system rotate by with origin");
 
         final CoordinateSystem coordinateSystem = new CoordinateSystem();
         final CoordinateSystem origin = new CoordinateSystem(new ArrayRealVector(new double[]{0, 1}), 0);
@@ -83,12 +88,12 @@ public class CoordinateSystemTest extends TestHelper {
         assertEquals(coordinateSystem.getRotation(), angularOffset * 2, delta);
         assertTrue(compare(coordinateSystem.getPosition(), origin.getPosition().mapMultiply(2)));
 
-        System.out.println("OK");
+        logger.info("OK");
     }
 
     @Test
     public void testRotateToWithOrigin() {
-        System.out.println("Testing coordinate system rotate to with origin");
+        logger.info("Testing coordinate system rotate to with origin");
 
         final CoordinateSystem coordinateSystem = new CoordinateSystem();
         final CoordinateSystem origin = new CoordinateSystem(new ArrayRealVector(new double[]{0, 1}), 0);
@@ -101,12 +106,12 @@ public class CoordinateSystemTest extends TestHelper {
         assertEquals(coordinateSystem.getRotation(), newAngle, delta);
         assertTrue(compare(coordinateSystem.getPosition(), new ArrayRealVector(new double[]{1, 1})));
 
-        System.out.println("OK");
+        logger.info("OK");
     }
 
     @Test
     public void testToLocals() {
-        System.out.println("Testing coordinate system toLocals");
+        logger.info("Testing coordinate system toLocals");
         final CoordinateSystem coordinateSystem = new CoordinateSystem(
                 new ArrayRealVector(new double[]{0, 1}),
                 Math.PI / 2
@@ -118,12 +123,12 @@ public class CoordinateSystemTest extends TestHelper {
 
         assertTrue(compare(localPoint, gotLocalPoint));
 
-        System.out.println("OK");
+        logger.info("OK");
     }
 
     @Test
     public void testToLocalsWithoutOffset() {
-        System.out.println("Testing coordinate system toLocalsWithouOffset");
+        logger.info("Testing coordinate system toLocalsWithouOffset");
         final double angle = Math.toRadians(30);
 
         final CoordinateSystem coordinateSystem = new CoordinateSystem(
@@ -137,12 +142,12 @@ public class CoordinateSystemTest extends TestHelper {
 
         assertTrue(compare(localPoint, gotLocalPoint));
 
-        System.out.println("OK");
+        logger.info("OK");
     }
 
     @Test
     public void testToGlobals() {
-        System.out.println("Testing coordinate system toGlobals");
+        logger.info("Testing coordinate system toGlobals");
         final CoordinateSystem coordinateSystem = new CoordinateSystem(
                 new ArrayRealVector(new double[]{0, 1}),
                 Math.PI / 2
@@ -154,12 +159,12 @@ public class CoordinateSystemTest extends TestHelper {
 
         assertTrue(compare(globalPoint, gotGlobalPoint));
 
-        System.out.println("OK");
+        logger.info("OK");
     }
 
     @Test
     public void testToGlobalsWithoutOffset() {
-        System.out.println("Testing coordinate system toGlobalsWithoutOffset");
+        logger.info("Testing coordinate system toGlobalsWithoutOffset");
         final double angle = Math.toRadians(30);
 
         final CoordinateSystem coordinateSystem = new CoordinateSystem(
@@ -173,6 +178,6 @@ public class CoordinateSystemTest extends TestHelper {
 
         assertTrue(compare(globalPoint, gotGlobalPoint));
 
-        System.out.println("OK");
+        logger.info("OK");
     }
 }

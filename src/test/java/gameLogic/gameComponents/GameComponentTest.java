@@ -1,14 +1,19 @@
 package gameLogic.gameComponents;
 
 import gameLogic.TestHelper;
+import gameLogic.base.CoordinateSystemTest;
 import org.apache.commons.math3.linear.ArrayRealVector;
 import org.apache.commons.math3.linear.RealVector;
 import org.junit.Test;
+
+import java.util.logging.Logger;
 
 import static org.junit.Assert.*;
 
 
 public class GameComponentTest extends TestHelper {
+    private final Logger logger = Logger.getLogger(GameComponentTest.class.getName());
+
     private TriangleField sector;
     private Platform platform;
     private double relDistance;
@@ -33,7 +38,7 @@ public class GameComponentTest extends TestHelper {
 
     @Test
     public void testMoveBy() {
-        System.out.println("Testing GameComponent.moveBy");
+        logger.info("Testing GameComponent.moveBy");
         init();
 
         sector.moveBy(new ArrayRealVector(new double[]{0, 100}));
@@ -41,12 +46,12 @@ public class GameComponentTest extends TestHelper {
         final RealVector correctPlatformPosition = getCorrectPlatformPosition();
 
         assertTrue(compare(platformPosition, correctPlatformPosition));
-        System.out.println("OK");
+        logger.info("OK");
     }
 
     @Test
     public void testMoveTo() {
-        System.out.println("Testing GameComponent.moveTo");
+        logger.info("Testing GameComponent.moveTo");
         init();
 
         sector.moveTo(new ArrayRealVector(new double[]{0, 100}));
@@ -54,12 +59,12 @@ public class GameComponentTest extends TestHelper {
         final RealVector correctPlatformPosition = getCorrectPlatformPosition();
 
         assertTrue(compare(platformPosition, correctPlatformPosition));
-        System.out.println("OK");
+        logger.info("OK");
     }
 
     @Test
     public void testRotateBy() {
-        System.out.println("Testing GameComponent.rotateBy");
+        logger.info("Testing GameComponent.rotateBy");
         init();
 
         sector.rotateBy(Math.PI / 4);
@@ -67,12 +72,12 @@ public class GameComponentTest extends TestHelper {
         final RealVector correctPlatformPosition = getCorrectPlatformPosition();
 
         assertTrue(compare(platformPosition, correctPlatformPosition));
-        System.out.println("OK");
+        logger.info("OK");
     }
 
     @Test
     public void testRotateTo() {
-        System.out.println("Testing GameComponent.rotateTo");
+        logger.info("Testing GameComponent.rotateTo");
         init();
 
         sector.rotateTo(Math.PI / 4);
@@ -80,24 +85,24 @@ public class GameComponentTest extends TestHelper {
         final RealVector correctPlatformPosition = getCorrectPlatformPosition();
 
         assertTrue(compare(platformPosition, correctPlatformPosition));
-        System.out.println("OK");
+        logger.info("OK");
     }
 
     @Test
     public void testMoveToWithConstraints() {
-        System.out.println("Testing GameComponent.moveToWithConstraints");
+        logger.info("Testing GameComponent.moveToWithConstraints");
         init();
 
         final RealVector platformStartPos = platform.getPosition();
 
         platform.moveByWithConstraints(new ArrayRealVector(new double[]{1000, 0}));
         assertTrue(compare(platformStartPos, platform.getPosition()));
-        System.out.println("Movement fail OK");
+        logger.info("Movement fail OK");
 
         platform.moveByWithConstraints(new ArrayRealVector(new double[]{1, 0}));
         assertTrue(compare(platformStartPos.add(new ArrayRealVector(new double[]{1, 0})), platform.getPosition()));
-        System.out.println("Movement success OK");
+        logger.info("Movement success OK");
 
-        System.out.println("OK");
+        logger.info("OK");
     }
 }

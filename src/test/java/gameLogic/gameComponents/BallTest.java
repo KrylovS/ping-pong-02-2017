@@ -9,8 +9,12 @@ import org.apache.commons.math3.linear.RealVector;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.util.logging.Logger;
+
 
 public class BallTest extends TestHelper {
+    private final Logger logger = Logger.getLogger(BallTest.class.getName());
+
     private Ball ball;
 
     @Before
@@ -20,7 +24,7 @@ public class BallTest extends TestHelper {
 
     @Test
     public void testBounceStatic() {
-        System.out.println("Testing ball bounce static");
+        logger.info("Testing ball bounce static");
         ball.setVelocity(new ArrayRealVector(new double[]{0, -1}));
 
         final double normAngle = Math.toRadians(45);
@@ -34,12 +38,12 @@ public class BallTest extends TestHelper {
 
         assertTrue(compare(newVelocity, correctVelocity));
 
-        System.out.println("OK");
+        logger.info("OK");
     }
 
     @Test
     public void testBounceDynamic() {
-        System.out.println("Testing ball bounce dynamic");
+        logger.info("Testing ball bounce dynamic");
         ball.setVelocity(new ArrayRealVector(new double[]{0, -1}));
 
         ball.bounceNorm(
@@ -52,12 +56,12 @@ public class BallTest extends TestHelper {
 
         assertTrue(compare(newVelocity, correctVelocity));
 
-        System.out.println("OK");
+        logger.info("OK");
     }
 
     @Test
     public void testStateLoading() {
-        System.out.println("Testing ball state loading");
+        logger.info("Testing ball state loading");
         final BallState ballState = new BallState(
                 new ArrayRealVector(new double[]{1, 0}),
                 new ArrayRealVector(new double[]{100, 200})
@@ -68,12 +72,12 @@ public class BallTest extends TestHelper {
         assertTrue(compare(ballState.getPosition(), ball.getPosition()));
         assertTrue(compare(ballState.getVelocity(), ball.getVelocity()));
 
-        System.out.println("OK");
+        logger.info("OK");
     }
 
     @Test
     public void testStateExtraction() {
-        System.out.println("Testing ball state extraction");
+        logger.info("Testing ball state extraction");
         final BallState ballState = new BallState(
                 new ArrayRealVector(new double[]{1, 0}),
                 new ArrayRealVector(new double[]{100, 200})
@@ -85,6 +89,6 @@ public class BallTest extends TestHelper {
         assertTrue(compare(ballState.getPosition(), newState.getPosition()));
         assertTrue(compare(ballState.getVelocity(), newState.getVelocity()));
 
-        System.out.println("OK");
+        logger.info("OK");
     }
 }
