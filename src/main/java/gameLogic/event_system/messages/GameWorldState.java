@@ -1,6 +1,8 @@
 package gameLogic.event_system.messages;
 
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import gameLogic.common.CommonFunctions;
 import gameLogic.event_system.messages.interfaces.DiscreteRotationInvariant;
 
@@ -11,7 +13,8 @@ public class GameWorldState implements DiscreteRotationInvariant<GameWorldState>
     private BallState ballState;
     private List<PlatformState> platformsState;
 
-    public GameWorldState(BallState ballState, List<PlatformState> platformsState) {
+    @JsonCreator
+    public GameWorldState(@JsonProperty("ballState") BallState ballState, @JsonProperty("platformsState") List<PlatformState> platformsState) {
         this.ballState = ballState;
         this.platformsState = platformsState;
     }

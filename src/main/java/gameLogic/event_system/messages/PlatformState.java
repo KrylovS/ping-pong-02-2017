@@ -1,8 +1,12 @@
 package gameLogic.event_system.messages;
 
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonGetter;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import gameLogic.base.GeometryOperations;
 import gameLogic.event_system.messages.interfaces.DiscreteRotationInvariant;
+import org.apache.commons.math3.linear.ArrayRealVector;
 import org.apache.commons.math3.linear.RealVector;
 
 public class PlatformState implements DiscreteRotationInvariant<PlatformState> {
@@ -18,8 +22,26 @@ public class PlatformState implements DiscreteRotationInvariant<PlatformState> {
         this.isActive = isActive;
     }
 
+    @JsonCreator
+    public PlatformState(
+            @JsonProperty("position") double[] position,
+            @JsonProperty("angle") double angle,
+            @JsonProperty("velocity") double[] velocity,
+            @JsonProperty("active") boolean isActive
+    ) {
+        this.position = new ArrayRealVector(position);
+        this.angle = angle;
+        this.velocity = new ArrayRealVector(velocity);
+        this.isActive = isActive;
+    }
+
     public RealVector getPosition() {
         return position;
+    }
+
+    @JsonGetter("position")
+    public double[] arrayGetPosition() {
+        return position.toArray();
     }
 
     public double getAngle() {
@@ -28,6 +50,11 @@ public class PlatformState implements DiscreteRotationInvariant<PlatformState> {
 
     public RealVector getVelocity() {
         return velocity;
+    }
+
+    @JsonGetter("velocity")
+    public double[] arrayGetVelocity() {
+        return velocity.toArray();
     }
 
     public boolean isActive() {

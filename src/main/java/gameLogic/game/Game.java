@@ -5,13 +5,9 @@ import gameLogic.config_models.GameConfig;
 import gameLogic.event_system.messages.GameWorldState;
 import gameLogic.gameComponents.Platform;
 
-import java.sql.Time;
-
 
 public class Game {
     //todo wire event bus
-
-    //todo load game config
 
     private GameWorld world;
     private long lastUpdateTime;
