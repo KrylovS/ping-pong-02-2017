@@ -1,15 +1,14 @@
 package gameLogic.event_system.messages;
 
+import gameLogic.common.CommonFunctions;
 import gameLogic.event_system.messages.interfaces.DiscreteRotationInvariant;
 
-/**
- * Created by artem on 5/26/17.
- */
+
 public class PlayerAnnouncement implements DiscreteRotationInvariant<PlayerAnnouncement> {
     private String nickname;
     private int position;
 
-    public PlayerAnnouncement(String nickname, int position) {
+    public PlayerAnnouncement(String nickname, Integer position) {
         this.nickname = nickname;
         this.position = position;
     }
@@ -24,7 +23,12 @@ public class PlayerAnnouncement implements DiscreteRotationInvariant<PlayerAnnou
 
     @Override
     public PlayerAnnouncement getDiscreteRotation(int stepNum, int totalSteps) {
-        final int newPosition = (position + stepNum) % totalSteps;
+        final int newPosition = CommonFunctions.getCircularOffset(position, stepNum, totalSteps);
         return new PlayerAnnouncement(nickname, newPosition);
+    }
+
+    @Override
+    public String toString() {
+        return "nickname: " + nickname + " position: " + position;
     }
 }

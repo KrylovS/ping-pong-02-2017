@@ -1,6 +1,7 @@
 package sample;
 
 import gameLogic.config_models.GameConfig;
+import gameLogic.event_system.messages.PlayerAnnouncement;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import sample.services.game.GameService;
@@ -31,6 +32,18 @@ public class Lobby {
     public void reset() {
         gameService.init();
         init();
+    }
+
+    public int getPlayersNum(int gameIndex) {
+        return userPartyMap.get(gameIndex).entrySet().size();
+    }
+
+    public List<PlayerAnnouncement> getCurrLobbyState(int gameIndex) {
+        return userPartyMap.get(gameIndex).entrySet().stream()
+                .map(entry -> new PlayerAnnouncement(entry.getKey(), entry.getValue()))
+                .sorted(Comparator.comparingInt(PlayerAnnouncement::getPosition))
+                .collect(Collectors.toList());
+
     }
 
     public List<String> getSortedPlayers(int gameIndex) {

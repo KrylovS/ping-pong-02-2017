@@ -6,6 +6,17 @@ import java.util.List;
 import java.util.stream.IntStream;
 
 public class CommonFunctions {
+    public static int getCircularOffset(int curr, int offset, int length) {
+        final int newId = curr + offset;
+        final int rest = newId % length;
+
+        if (rest < 0) {
+            return rest + length;
+        } else {
+            return rest;
+        }
+    }
+
     public static <T> T getByCircularIndex(List<T> list, int index) {
         int itemIndex = index % list.size();
         itemIndex = itemIndex >= 0 ? itemIndex : itemIndex + list.size();

@@ -3,9 +3,7 @@ package sample.websocket;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.jetbrains.annotations.NotNull;
 
-/**
- * Created by sergey on 22.04.17.
- */
+
 @SuppressWarnings("NullableProblems")
 public class Message<T> {
     @NotNull

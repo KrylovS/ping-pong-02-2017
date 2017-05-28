@@ -25,9 +25,6 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 
-/**
- * Created by sergey on 22.04.17.
- */
 @Service
 public class GameSocketService
 {
@@ -41,6 +38,13 @@ public class GameSocketService
 
     public void registerUser(@NotNull String email, @NotNull WebSocketSession webSocketSession) {
         sessions.put(email, webSocketSession);
+
+        final int partyId = lobby.addPlayer(email);
+        final int playerId = lobby.getPlayerPartyId(email, partyId);
+        webSocketSession.getAttributes().put(WSDict.PARTY_ID, partyId);
+        webSocketSession.getAttributes().put(WSDict.PLAYER_ID, playerId);
+
+        transmitLobbyState(partyId);
     }
 
     public boolean isConnected(@NotNull String email) {
@@ -87,17 +91,15 @@ public class GameSocketService
         gameService.addUserTask(partyId, playerId, platformState);
     }
 
-    public void announcePlayer(String email, int partyId, int playerId) {
-        final PlayerAnnouncement initialState = new PlayerAnnouncement(email, playerId);
-        transmitPartyMessage(
-                partyId,
-                IntStream.range(0, GameConfig.PLAYERS_NUM).boxed()
-                        .map(i -> {
-                            final PlayerAnnouncement newState = initialState.getDiscreteRotation(i, GameConfig.PLAYERS_NUM);
-                            return new Message<>(WSDict.ANNOUNCE, newState);
-                        })
+    public void transmitLobbyState(Integer partyId) {
+        final List<PlayerAnnouncement> lobbyState = lobby.getCurrLobbyState(partyId);
+        final List<List<Message<PlayerAnnouncement>>> localStates = IntStream.range(0, lobbyState.size()).boxed()
+                .map(i -> lobbyState.stream()
+                        .map(pa -> new Message<>(WSDict.ANNOUNCE, pa.getDiscreteRotation(-i, GameConfig.PLAYERS_NUM)))
                         .collect(Collectors.toList())
-        );
+                ).collect(Collectors.toList());
+
+        localStates.forEach(localState -> transmitPartyMessage(partyId, localState));
     }
 
     public void updateGamePartyState(Integer partyId, List<GameWorldState> gameWorldStates) {
@@ -111,7 +113,8 @@ public class GameSocketService
 
     private <T> void transmitPartyMessage(Integer partyId, List<Message<T>> messages) {
         final List<String> players = lobby.getSortedPlayers(partyId);
-        IntStream.range(0, GameConfig.PLAYERS_NUM).forEach(i -> {
+
+        IntStream.range(0, players.size()).forEach(i -> {
             try {
                 sendMessageToUser(players.get(i), messages.get(i));
             } catch (IOException e) {

@@ -12,11 +12,14 @@ import javax.naming.AuthenticationException;
 import javax.servlet.http.HttpSession;
 
 import java.io.IOException;
+import java.util.logging.Logger;
+
 /**
  * Created by sergey on 22.04.17.
  */
 
 public class GameWebSocketHandler extends TextWebSocketHandler {
+    private static final Logger LOGGER = Logger.getLogger(GameWebSocketHandler.class.getName());
 
     @NotNull
     private AccountServiceDB accountServiceDB;
@@ -32,11 +35,14 @@ public class GameWebSocketHandler extends TextWebSocketHandler {
 
     @Override
     public void afterConnectionEstablished(WebSocketSession webSocketSession) throws AuthenticationException {
-        System.out.println("Connection established");
-        final String email = "random";//final String email = (String) webSocketSession.getAttributes().get(SESSIONATRIBUTE);
-        /*if (email == null || accountServiceDB.getUser(email) == null) {
-            throw new AuthenticationException("Only authenticated users allowed to play a game");
-        }*/
+        LOGGER.info("Connection established");
+
+        String email = (String) webSocketSession.getAttributes().get(WSDict.SESSION_ATTRIBUTE);
+        if (email == null) {
+            email = RandomUtils.getRandomString();
+            LOGGER.info("Random email generated");
+        }
+
         gameSocketService.registerUser(email, webSocketSession);
     }
 
@@ -53,11 +59,9 @@ public class GameWebSocketHandler extends TextWebSocketHandler {
 
     @SuppressWarnings("OverlyBroadCatchBlock")
     private void handleMessage(String email, TextMessage text) {
-        final Message message;
         System.out.println("Handle message");
         try {
-            message = objectMapper.readValue(text.getPayload(), Message.class);
-            //gameSocketService.recievePlayerState(email, message);
+            final Message message = objectMapper.readValue(text.getPayload(), Message.class);
             gameSocketService.sendMessageToUser(email, message);
         } catch (IOException ex) {
             System.out.println("wrong json format at ping response" + ex);
