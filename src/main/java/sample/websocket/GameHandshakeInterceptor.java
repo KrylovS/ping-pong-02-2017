@@ -29,11 +29,6 @@ public class GameHandshakeInterceptor extends HttpSessionHandshakeInterceptor {
             }
         }
 
-//        } else {
-//            email = null;
-//        }
-//        attributes.put(WSDict.SESSION_ATTRIBUTE, email);
-
         return true;
     }
 

@@ -76,17 +76,18 @@ public class GameService {
         while (true) {
             gameMap.values().forEach(
                 game -> {
-                    final long timeLeft = System.currentTimeMillis() - game.getLastUpdateTime();
+                    if (game.isRunning()) {
+                        final long updateTimeLeft = System.currentTimeMillis() - game.getLastUpdateTime();
+                        if (updateTimeLeft >= GameConfig.RENDER_TIME) {
+                            game.resetLastUpdateTime();
+                            executorService.submit(() -> updateGame(updateTimeLeft, game));
+                        }
 
-                    if (timeLeft >= GameConfig.RENDER_TIME) {
-                        executorService.submit(() -> {
-                            final long timestamp = System.currentTimeMillis();
-                            final long updateTimeLeft = timestamp - game.getLastUpdateTime();
-                            final long transmitTimeLeft = timestamp - game.getLastTransmitTime();
-
-                            updateGame(updateTimeLeft, game);
-                            transmitState(transmitTimeLeft, game);
-                        });
+                        final long transmitTimeLeft = System.currentTimeMillis() - game.getLastTransmitTime();
+                        if (transmitTimeLeft >= GameConfig.WS_TIME) {
+                            game.resetLastTransmitTime();
+                            executorService.submit(() -> transmitState(game));
+                        }
                     }
                 }
             );
@@ -94,15 +95,11 @@ public class GameService {
     }
 
     private void updateGame(double updateTimeLeft, Game game) {
-        if (game.isRunning() && updateTimeLeft >= GameConfig.RENDER_TIME) {
-            game.makeIteration(updateTimeLeft);
-        }
+        game.makeIteration(updateTimeLeft);
     }
 
-    private void transmitState(double transmitTimeLeft, Game game) {
-        if (game.isRunning() && transmitTimeLeft >= GameConfig.WS_TIME) {
-            gameSocketService.updateGamePartyState(game.getId(), getGameStateList(game.getId()));
-        }
+    private void transmitState(Game game) {
+        gameSocketService.updateGamePartyState(game.getId(), getGameStateList(game.getId()));
     }
 
 }

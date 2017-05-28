@@ -17,6 +17,7 @@ import sample.services.game.GameService;
 
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -93,13 +94,16 @@ public class GameSocketService
 
     public void transmitLobbyState(Integer partyId) {
         final List<PlayerAnnouncement> lobbyState = lobby.getCurrLobbyState(partyId);
-        final List<List<Message<PlayerAnnouncement>>> localStates = IntStream.range(0, lobbyState.size()).boxed()
+        final List<Message<List<PlayerAnnouncement>>> localStates = IntStream.range(0, lobbyState.size()).boxed()
                 .map(i -> lobbyState.stream()
-                        .map(pa -> new Message<>(WSDict.ANNOUNCE, pa.getDiscreteRotation(-i, GameConfig.PLAYERS_NUM)))
+                        .map(pa -> pa.getDiscreteRotation(-i, GameConfig.PLAYERS_NUM))
+                        .sorted(Comparator.comparingInt(PlayerAnnouncement::getPosition))
                         .collect(Collectors.toList())
-                ).collect(Collectors.toList());
+                )
+                .map(messageContent -> new Message<>(WSDict.ANNOUNCE, messageContent))
+                .collect(Collectors.toList());
 
-        localStates.forEach(localState -> transmitPartyMessage(partyId, localState));
+        transmitPartyMessage(partyId, localStates);
     }
 
     public void updateGamePartyState(Integer partyId, List<GameWorldState> gameWorldStates) {

@@ -5,6 +5,8 @@ import gameLogic.config_models.GameConfig;
 import gameLogic.event_system.messages.GameWorldState;
 import gameLogic.gameComponents.Platform;
 
+import java.sql.Time;
+
 
 public class Game {
     //todo wire event bus
@@ -53,12 +55,16 @@ public class Game {
         return lastUpdateTime;
     }
 
-    public long getLastTransmitTime() {
+    public void resetLastUpdateTime() {
+        lastUpdateTime = System.currentTimeMillis();
+    }
+
+    public synchronized long getLastTransmitTime() {
         return lastTransmitTime;
     }
 
-    public void setLastTransmitTime(long transmitTime) {
-        lastTransmitTime = transmitTime;
+    public synchronized void resetLastTransmitTime() {
+        lastTransmitTime = System.currentTimeMillis();
     }
 
     public int getUserNum() {
@@ -73,9 +79,8 @@ public class Game {
         return CommonFunctions.getByCircularIndex(world.getPlatforms(), index);
     }
 
-    public synchronized void makeIteration(double time) {
+    public void makeIteration(double time) {
         world.makeIteration(time);
-        lastUpdateTime = System.currentTimeMillis();
     }
 
     private void initWorld() {

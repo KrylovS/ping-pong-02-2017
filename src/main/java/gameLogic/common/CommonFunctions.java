@@ -24,12 +24,14 @@ public class CommonFunctions {
     }
 
     public static <T> List<T> getCircularTransposition(List<T> list) {
-        final List<T> result = new ArrayList<>(list.size());
+        final List<T> result = new ArrayList<>(list);
+
         IntStream.range(0, list.size()).boxed()
                 .forEach(i -> result.set(
-                        (i + 1) % result.size(),
-                        list.get(i)
-                ));
+                            (i + 1) % result.size(),
+                            list.get(i)
+                        )
+                );
         return result;
     }
 }

@@ -9,7 +9,7 @@ import org.apache.commons.math3.linear.RealVector;
 public class GameConfig {
     public static final int MILLISECONDS_PER_SECOND = 1000;
     public static final int RENDER_FRAME_RATE = 60;
-    public static final int WS_UPDATE_FRAME_RATE = 10;
+    public static final double WS_UPDATE_FRAME_RATE = 1;
     public static final double FIELD_SIZE = 100;
     public static final int PLAYERS_NUM = 4;
     public static final double FILL_FACTOR = 0.8;
