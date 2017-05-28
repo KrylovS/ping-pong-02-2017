@@ -16,6 +16,8 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 
 @Service
@@ -37,8 +39,12 @@ public class GameService {
         executorService.submit(this::renderLoop);
     }
 
-    public int getGamesNumber() {
-        return gameMap.size();
+    public void play(int gameIndex) {
+        this.gameMap.get(gameIndex).play();
+    }
+
+    public void pause(int gameIndex) {
+        this.gameMap.get(gameIndex).pause();
     }
 
     public int getNextGameId() {
@@ -55,15 +61,11 @@ public class GameService {
 
     public List<GameWorldState> getGameStateList(int gameId) {
         final Game game = gameMap.get(gameId);
-
-        final List<GameWorldState> stateList = new ArrayList<>();
-        stateList.add(game.getWorldState());
-
-        for (int i = 0; i != game.getUserNum() - 1; ++i) {
-            stateList.add(stateList.get(stateList.size() - 1).getDiscreteRotation());
-        }
-
-        return stateList;
+        final GameWorldState initialState = game.getWorldState();
+        
+        return IntStream.range(0, game.getUserNum()).boxed()
+                .map(i -> initialState.getDiscreteRotation(i, game.getUserNum()))
+                .collect(Collectors.toList());
     }
 
     public void addUserTask(int gameId, int userIndex, PlatformState platformState) {
@@ -92,13 +94,13 @@ public class GameService {
     }
 
     private void updateGame(double updateTimeLeft, Game game) {
-        if (updateTimeLeft >= GameConfig.RENDER_TIME) {
+        if (game.isRunning() && updateTimeLeft >= GameConfig.RENDER_TIME) {
             game.makeIteration(updateTimeLeft);
         }
     }
 
     private void transmitState(double transmitTimeLeft, Game game) {
-        if (transmitTimeLeft >= GameConfig.WS_TIME) {
+        if (game.isRunning() && transmitTimeLeft >= GameConfig.WS_TIME) {
             gameSocketService.updateGamePartyState(game.getId(), getGameStateList(game.getId()));
         }
     }

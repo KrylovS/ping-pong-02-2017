@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import gameLogic.config_models.GameConfig;
 import gameLogic.event_system.messages.GameWorldState;
 import gameLogic.event_system.messages.PlatformState;
+import gameLogic.event_system.messages.PlayerAnnouncement;
 import org.eclipse.jetty.websocket.api.WebSocketException;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,13 +17,11 @@ import sample.services.game.GameService;
 
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 
@@ -34,7 +33,6 @@ public class GameSocketService
 {
     private final Logger logger = Logger.getLogger(GameSocketService.class.getName());
     private Map<String, WebSocketSession> sessions = new ConcurrentHashMap<>();
-    //private ObjectMapper objectMapper = new ObjectMapper();
 
     @Autowired
     private Lobby lobby;
@@ -49,8 +47,7 @@ public class GameSocketService
         return sessions.containsKey(email) && sessions.get(email).isOpen();
     }
 
-    public void removeUser(@NotNull String email)
-    {
+    public void removeUser(@NotNull String email) {
         sessions.remove(email);
     }
 
@@ -80,29 +77,43 @@ public class GameSocketService
         }
     }
 
-    public void addUserToGame(HttpSession httpSession, @NotNull String email) {
-        final Integer partyId = lobby.addPlayer(email);
-        final Integer playerId = lobby.getPlayerPartyId(email, partyId);
-        httpSession.setAttribute("partyId", partyId);
-        httpSession.setAttribute("playerId", playerId);
-    }
-
     public void recievePlayerState(String email, Message<?> message) {
         final WebSocketSession webSocketSession = sessions.get(email);
 
         final PlatformState platformState = (PlatformState) message.getContent();
-        final Integer partyId = (Integer) webSocketSession.getAttributes().get("partyId");
-        final Integer playerId = (Integer) webSocketSession.getAttributes().get("playerId");
+        final Integer partyId = (Integer) webSocketSession.getAttributes().get(WSDict.PARTY_ID);
+        final Integer playerId = (Integer) webSocketSession.getAttributes().get(WSDict.PLAYER_ID);
 
         gameService.addUserTask(partyId, playerId, platformState);
     }
 
-    public void updateGamePartyState(Integer partyId, List<GameWorldState> gameWorldStates) {
-        final List<String> players = lobby.getSortedPlayers(partyId);
+    public void announcePlayer(String email, int partyId, int playerId) {
+        final PlayerAnnouncement initialState = new PlayerAnnouncement(email, playerId);
+        transmitPartyMessage(
+                partyId,
+                IntStream.range(0, GameConfig.PLAYERS_NUM).boxed()
+                        .map(i -> {
+                            final PlayerAnnouncement newState = initialState.getDiscreteRotation(i, GameConfig.PLAYERS_NUM);
+                            return new Message<>(WSDict.ANNOUNCE, newState);
+                        })
+                        .collect(Collectors.toList())
+        );
+    }
 
+    public void updateGamePartyState(Integer partyId, List<GameWorldState> gameWorldStates) {
+        transmitPartyMessage(
+                partyId,
+                gameWorldStates.stream()
+                        .map(state -> new Message<>(WSDict.WORLD_STATE, state))
+                        .collect(Collectors.toList())
+        );
+    }
+
+    private <T> void transmitPartyMessage(Integer partyId, List<Message<T>> messages) {
+        final List<String> players = lobby.getSortedPlayers(partyId);
         IntStream.range(0, GameConfig.PLAYERS_NUM).forEach(i -> {
             try {
-                sendMessageToUser(players.get(i), new Message<>("state", gameWorldStates.get(i)));
+                sendMessageToUser(players.get(i), messages.get(i));
             } catch (IOException e) {
                 logger.warning(e.getMessage());
             }

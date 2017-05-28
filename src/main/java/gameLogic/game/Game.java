@@ -15,9 +15,11 @@ public class Game {
     private long lastUpdateTime;
     private long lastTransmitTime;
     private int id;
+    private boolean running;
 
     public Game(int id) {
         this.id = id;
+        running = true;
 
         final long timestamp = System.currentTimeMillis();
         lastUpdateTime = timestamp;    // TODO check if correct
@@ -33,6 +35,18 @@ public class Game {
 
     public int getId() {
         return id;
+    }
+
+    public boolean isRunning() {
+        return running;
+    }
+
+    public void pause() {
+        running = false;
+    }
+
+    public void play() {
+        running = true;
     }
 
     public long getLastUpdateTime() {

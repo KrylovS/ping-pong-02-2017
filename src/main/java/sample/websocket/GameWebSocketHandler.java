@@ -25,20 +25,10 @@ public class GameWebSocketHandler extends TextWebSocketHandler {
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 
-    private static final String SESSIONATRIBUTE = "email";
-
     public GameWebSocketHandler(@NotNull AccountServiceDB accountServiceDB, @NotNull GameSocketService gameSocketService) {
         this.accountServiceDB = accountServiceDB;
         this.gameSocketService = gameSocketService;
     }
-
-    /*public GameWebSocketHandler(@NotNull MessageHandlerContainer messageHandlerContainer, @NotNull PingService pingService,
-                                @NotNull AccountService authService, @NotNull GameSocketService gameSocketService) {
-        this.messageHandlerContainer = messageHandlerContainer;
-        this.pingService = pingService;
-        this.accountService = authService;
-        this.gameSocketService = gameSocketService;
-    }*/
 
     @Override
     public void afterConnectionEstablished(WebSocketSession webSocketSession) throws AuthenticationException {
@@ -67,11 +57,10 @@ public class GameWebSocketHandler extends TextWebSocketHandler {
         System.out.println("Handle message");
         try {
             message = objectMapper.readValue(text.getPayload(), Message.class);
-            gameSocketService.recievePlayerState(email, message);
+            //gameSocketService.recievePlayerState(email, message);
             gameSocketService.sendMessageToUser(email, message);
         } catch (IOException ex) {
             System.out.println("wrong json format at ping response" + ex);
-            return;
         }
     }
 
