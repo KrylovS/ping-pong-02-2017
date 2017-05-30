@@ -1,6 +1,8 @@
 package sample.websocket;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import gameLogic.event_system.messages.PlatformState;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
@@ -9,7 +11,6 @@ import org.springframework.web.socket.handler.TextWebSocketHandler;
 import sample.services.account.AccountServiceDB;
 
 import javax.naming.AuthenticationException;
-import javax.servlet.http.HttpSession;
 
 import java.io.IOException;
 import java.util.logging.Logger;
@@ -48,23 +49,27 @@ public class GameWebSocketHandler extends TextWebSocketHandler {
 
     @Override
     protected void handleTextMessage(WebSocketSession session, TextMessage message) throws AuthenticationException {
-        final String email = "random"; //final String email = (String) session.getAttributes().get(SESSIONATRIBUTE);
-        System.out.println("Handle text message");
-        /*if (email == null || (accountServiceDB.getUser(email) == null)) {
-            throw new AuthenticationException("Only authenticated users allowed to play a game");
-        }*/
-        handleMessage(email, message);
+        final int partyId = (int) session.getAttributes().get(WSDict.PARTY_ID);
+        final int playerId = (int) session.getAttributes().get(WSDict.PLAYER_ID);
+        handleMessage(partyId, playerId, message);
     }
 
 
     @SuppressWarnings("OverlyBroadCatchBlock")
-    private void handleMessage(String email, TextMessage text) {
+    private void handleMessage(int partyId, int playerId, TextMessage text) {
         System.out.println("Handle message");
         try {
-            final Message message = objectMapper.readValue(text.getPayload(), Message.class);
-            gameSocketService.sendMessageToUser(email, message);
+            final ObjectNode message = objectMapper.readValue(text.getPayload(), ObjectNode.class);
+            if (message.get("type").asText().equals(WSDict.PLATFORM_MOVED)) {
+                gameSocketService.updatePlatformState(
+                        partyId,
+                        playerId,
+                        objectMapper.readValue(message.get("data").toString(), PlatformState.class)  // TODO make something more elegant
+                );
+            }
+
         } catch (IOException ex) {
-            System.out.println("wrong json format at ping response" + ex);
+            System.out.println("wrong json format" + ex);
         }
     }
 

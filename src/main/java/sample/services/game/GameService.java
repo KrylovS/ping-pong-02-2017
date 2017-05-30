@@ -64,12 +64,15 @@ public class GameService {
         final GameWorldState initialState = game.getWorldState();
         
         return IntStream.range(0, game.getUserNum()).boxed()
-                .map(i -> initialState.getDiscreteRotation(i, game.getUserNum()))
+                .map(i -> initialState.getDiscreteRotation(-i, game.getUserNum()))
                 .collect(Collectors.toList());
     }
 
     public void addUserTask(int gameId, int userIndex, PlatformState platformState) {
-        executorService.submit(() -> gameMap.get(gameId).getPlatformByIndex(userIndex).setState(platformState));
+        executorService.submit(() -> gameMap
+                .get(gameId)
+                .getPlatformByIndex(userIndex)
+                .setState(platformState.getDiscreteRotation(userIndex, GameConfig.PLAYERS_NUM)));
     }
 
     private void renderLoop() {

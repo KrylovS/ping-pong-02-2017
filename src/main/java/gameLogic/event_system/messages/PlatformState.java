@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import gameLogic.base.GeometryOperations;
+import gameLogic.common.CommonFunctions;
 import gameLogic.event_system.messages.interfaces.DiscreteRotationInvariant;
 import org.apache.commons.math3.linear.ArrayRealVector;
 import org.apache.commons.math3.linear.RealVector;
@@ -66,7 +67,7 @@ public class PlatformState implements DiscreteRotationInvariant<PlatformState> {
         final double rotationAngle = 2 * Math.PI / totalSteps * stepNum;
         return new PlatformState(
                 GeometryOperations.rotate(position, rotationAngle),
-                angle + rotationAngle,
+                CommonFunctions.getCircularValue(angle, rotationAngle, 2 * Math.PI),
                 GeometryOperations.rotate(velocity, rotationAngle),
                 isActive
         );

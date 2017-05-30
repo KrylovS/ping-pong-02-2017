@@ -6,6 +6,17 @@ import java.util.List;
 import java.util.stream.IntStream;
 
 public class CommonFunctions {
+    public static double getCircularValue(double val, double offset, double limit) {
+        final double newVal = val + offset;
+        final double rest = newVal - ((int) (newVal / limit)) * limit;
+
+        if (rest < 0) {
+            return rest + limit;
+        }
+
+        return rest;
+    }
+
     public static int getCircularOffset(int curr, int offset, int length) {
         final int newId = curr + offset;
         final int rest = newId % length;

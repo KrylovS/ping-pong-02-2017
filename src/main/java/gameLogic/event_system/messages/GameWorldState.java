@@ -31,7 +31,8 @@ public class GameWorldState implements DiscreteRotationInvariant<GameWorldState>
     public GameWorldState getDiscreteRotation(int stepNum, int totalSteps) {
         final double rotationAngle = 2 * Math.PI / totalSteps * stepNum;
         final BallState newBallState = ballState.rotate(rotationAngle);
-        final List<PlatformState> newPlatformsState = CommonFunctions.getCircularTransposition(platformsState).stream().
+
+        final List<PlatformState> newPlatformsState = platformsState.stream().
                 map(state -> state.getDiscreteRotation(stepNum, totalSteps))
                 .collect(Collectors.toList());
 

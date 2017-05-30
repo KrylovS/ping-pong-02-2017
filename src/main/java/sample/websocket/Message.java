@@ -1,15 +1,20 @@
 package sample.websocket;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.jetbrains.annotations.NotNull;
 
 
 @SuppressWarnings("NullableProblems")
 public class Message<T> {
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+
     @NotNull
     private String type;
     @NotNull
-    private T content;
+    private T data;
 
     @NotNull
     public String getType() {
@@ -17,26 +22,20 @@ public class Message<T> {
     }
 
     @NotNull
-    public T getContent() {
-        return content;
+    public T getData() {
+        return data;
     }
 
-    public Message() {
-    }
-
-    public Message(@NotNull @JsonProperty("type") String type, @NotNull @JsonProperty("content") T content) {
+    public Message(@NotNull @JsonProperty("type") String type, @NotNull @JsonProperty("data") T data) {
         this.type = type;
-        this.content = content;
+        this.data = data;
     }
 
-    /*
-    public Message(@NotNull Class clazz, @NotNull String content) {
-        this(clazz.getName(), content);
-    }
-    */
-
-    public String getStingMessage() {
-        return "\"type\": \"" + this.getType() + "\", " + "\"content\":\""   + this.getContent() + "\"";
+    public String getStingMessage() throws JsonProcessingException {
+        final ObjectNode node = OBJECT_MAPPER.createObjectNode();
+        node.put("type", type);
+        node.set("data", OBJECT_MAPPER.valueToTree(data));
+        return OBJECT_MAPPER.writeValueAsString(node);
     }
 }
 

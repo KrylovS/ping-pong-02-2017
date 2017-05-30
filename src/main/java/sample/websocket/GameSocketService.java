@@ -1,6 +1,7 @@
 package sample.websocket;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import gameLogic.config_models.GameConfig;
 import gameLogic.event_system.messages.GameWorldState;
 import gameLogic.event_system.messages.PlatformState;
@@ -15,7 +16,6 @@ import org.springframework.web.socket.WebSocketSession;
 import sample.Lobby;
 import sample.services.game.GameService;
 
-import javax.servlet.http.HttpSession;
 import java.io.IOException;
 import java.util.Comparator;
 import java.util.List;
@@ -31,6 +31,7 @@ public class GameSocketService
 {
     private final Logger logger = Logger.getLogger(GameSocketService.class.getName());
     private Map<String, WebSocketSession> sessions = new ConcurrentHashMap<>();
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
     @Autowired
     private Lobby lobby;
@@ -45,7 +46,13 @@ public class GameSocketService
         webSocketSession.getAttributes().put(WSDict.PARTY_ID, partyId);
         webSocketSession.getAttributes().put(WSDict.PLAYER_ID, playerId);
 
-        transmitLobbyState(partyId);
+        final List<Message<List<PlayerAnnouncement>>> lobbyState = getLobbyState(partyId);
+        transmitTransformedMessage(partyId, lobbyState);
+
+        if (lobbyState.size() == GameConfig.PLAYERS_NUM) {
+            transmitGetReadyMessage(partyId, lobbyState);
+            transmitGameStartMessage(partyId);  // TODO postpone execution
+        }
     }
 
     public boolean isConnected(@NotNull String email) {
@@ -82,19 +89,14 @@ public class GameSocketService
         }
     }
 
-    public void recievePlayerState(String email, Message<?> message) {
-        final WebSocketSession webSocketSession = sessions.get(email);
-
-        final PlatformState platformState = (PlatformState) message.getContent();
-        final Integer partyId = (Integer) webSocketSession.getAttributes().get(WSDict.PARTY_ID);
-        final Integer playerId = (Integer) webSocketSession.getAttributes().get(WSDict.PLAYER_ID);
-
+    public void updatePlatformState(int partyId, int playerId, PlatformState platformState) {
         gameService.addUserTask(partyId, playerId, platformState);
     }
 
-    public void transmitLobbyState(Integer partyId) {
+    public List<Message<List<PlayerAnnouncement>>> getLobbyState(Integer partyId) {
         final List<PlayerAnnouncement> lobbyState = lobby.getCurrLobbyState(partyId);
-        final List<Message<List<PlayerAnnouncement>>> localStates = IntStream.range(0, lobbyState.size()).boxed()
+
+        return IntStream.range(0, lobbyState.size()).boxed()
                 .map(i -> lobbyState.stream()
                         .map(pa -> pa.getDiscreteRotation(-i, GameConfig.PLAYERS_NUM))
                         .sorted(Comparator.comparingInt(PlayerAnnouncement::getPosition))
@@ -102,12 +104,10 @@ public class GameSocketService
                 )
                 .map(messageContent -> new Message<>(WSDict.ANNOUNCE, messageContent))
                 .collect(Collectors.toList());
-
-        transmitPartyMessage(partyId, localStates);
     }
 
     public void updateGamePartyState(Integer partyId, List<GameWorldState> gameWorldStates) {
-        transmitPartyMessage(
+        transmitTransformedMessage(
                 partyId,
                 gameWorldStates.stream()
                         .map(state -> new Message<>(WSDict.WORLD_STATE, state))
@@ -115,7 +115,25 @@ public class GameSocketService
         );
     }
 
-    private <T> void transmitPartyMessage(Integer partyId, List<Message<T>> messages) {
+    public void transmitGetReadyMessage(Integer partyId, List<Message<List<PlayerAnnouncement>>> lobbyState) {
+        transmitSameMessage(partyId, new Message<>(WSDict.GET_READY, lobbyState));
+    }
+
+    public void transmitGameStartMessage(Integer partyId) {
+        transmitSameMessage(partyId, new Message<>(WSDict.START_GAME, ""));
+    }
+
+    private <T> void transmitSameMessage(Integer partyId, Message<T> message) {
+        lobby.getSortedPlayers(partyId).forEach(player -> {
+            try {
+                sendMessageToUser(player, message);
+            } catch (IOException e) {
+                logger.warning(e.getMessage());
+            }
+        });
+    }
+
+    private <T> void transmitTransformedMessage(Integer partyId, List<Message<T>> messages) {
         final List<String> players = lobby.getSortedPlayers(partyId);
 
         IntStream.range(0, players.size()).forEach(i -> {
