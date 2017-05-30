@@ -81,12 +81,10 @@ public class GameWebSocketHandler extends TextWebSocketHandler {
     @Override
     public void afterConnectionClosed(WebSocketSession webSocketSession, CloseStatus closeStatus) throws Exception {
         System.out.println("Connection closed");
-        final String email = "random"; //final String email = (String) webSocketSession.getAttributes().get(SESSIONATRIBUTE);
-        /*if (email == null) {
-            System.out.println("User disconnected but his session was not found (closeStatus=" + closeStatus + ')');
-            return;
-        }*/
-        gameSocketService.removeUser(email);
+
+        final int partyId = (int) webSocketSession.getAttributes().get(WSDict.PARTY_ID);
+        final int playerId = (int) webSocketSession.getAttributes().get(WSDict.PLAYER_ID);
+        final String email = gameSocketService.removeUser(partyId, playerId);
     }
 
     @Override

@@ -26,7 +26,10 @@ public class GameService {
     GameSocketService gameSocketService;
 
     private volatile ConcurrentMap<Integer, Game> gameMap;
-    private ExecutorService executorService = Executors.newFixedThreadPool(10); // TODO move thread number to config
+    private ExecutorService renderLoopService = Executors.newFixedThreadPool(1); // TODO move thread number to config
+    private ExecutorService partyProgressService = Executors.newFixedThreadPool(6); // TODO move thread number to config
+    private ExecutorService stateTransmissionService = Executors.newFixedThreadPool(3); // TODO move thread number to config
+    private ExecutorService userInputService = Executors.newFixedThreadPool(3); // TODO move thread number to config
     private AtomicInteger gameCounter;
 
     public GameService() {
@@ -36,7 +39,7 @@ public class GameService {
     public void init() {
         gameMap = new ConcurrentHashMap<>();
         gameCounter = new AtomicInteger();
-        executorService.submit(this::renderLoop);
+        renderLoopService.submit(this::renderLoop);
     }
 
     public void play(int gameIndex) {
@@ -69,7 +72,7 @@ public class GameService {
     }
 
     public void addUserTask(int gameId, int userIndex, PlatformState platformState) {
-        executorService.submit(() -> gameMap
+        userInputService.submit(() -> gameMap
                 .get(gameId)
                 .getPlatformByIndex(userIndex)
                 .setState(platformState.getDiscreteRotation(userIndex, GameConfig.PLAYERS_NUM)));
@@ -83,13 +86,13 @@ public class GameService {
                         final long updateTimeLeft = System.currentTimeMillis() - game.getLastUpdateTime();
                         if (updateTimeLeft >= GameConfig.RENDER_TIME) {
                             game.resetLastUpdateTime();
-                            executorService.submit(() -> updateGame(updateTimeLeft, game));
+                            partyProgressService.submit(() -> updateGame(updateTimeLeft, game));
                         }
 
                         final long transmitTimeLeft = System.currentTimeMillis() - game.getLastTransmitTime();
                         if (transmitTimeLeft >= GameConfig.WS_TIME) {
                             game.resetLastTransmitTime();
-                            executorService.submit(() -> transmitState(game));
+                            stateTransmissionService.submit(() -> transmitState(game));
                         }
                     }
                 }

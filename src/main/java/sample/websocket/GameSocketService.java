@@ -59,8 +59,10 @@ public class GameSocketService
         return sessions.containsKey(email) && sessions.get(email).isOpen();
     }
 
-    public void removeUser(@NotNull String email) {
-        sessions.remove(email);
+    public String removeUser(@NotNull int partyId, @NotNull int playerId) {
+//        sessions.remove(email);
+        lobby.removePlayer(partyId, playerId);
+        return null;
     }
 
     public void cutDownConnection(@NotNull String email, @NotNull CloseStatus closeStatus) {

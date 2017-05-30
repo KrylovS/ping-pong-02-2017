@@ -1,16 +1,15 @@
-package sample.websocket;
+package sample;
 
-/**
- * Created by sergey on 22.04.17.
- */
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.socket.config.annotation.EnableWebSocket;
 import org.springframework.web.socket.config.annotation.WebSocketConfigurer;
 import org.springframework.web.socket.config.annotation.WebSocketHandlerRegistry;
 import sample.services.account.AccountServiceDB;
+import sample.websocket.GameHandshakeInterceptor;
+import sample.websocket.GameSocketService;
+import sample.websocket.GameWebSocketHandler;
 
-@Configuration
 @EnableWebSocket
 public class WebSocketConfig implements WebSocketConfigurer {
     @Autowired

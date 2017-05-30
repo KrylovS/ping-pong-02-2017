@@ -1,5 +1,7 @@
 package sample;
 
+import com.google.common.collect.BiMap;
+import com.google.common.collect.HashBiMap;
 import gameLogic.config_models.GameConfig;
 import gameLogic.event_system.messages.PlayerAnnouncement;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,7 +17,7 @@ import java.util.stream.Collectors;
 @Service
 public class Lobby {
     private AtomicInteger userIdCounter;
-    private ConcurrentMap<Integer, Map<String, Integer>> userPartyMap;
+    private ConcurrentMap<Integer, BiMap<String, Integer>> userPartyMap;
 
     @Autowired
     GameService gameService;
@@ -32,10 +34,6 @@ public class Lobby {
     public void reset() {
         gameService.init();
         init();
-    }
-
-    public int getPlayersNum(int gameIndex) {
-        return userPartyMap.get(gameIndex).entrySet().size();
     }
 
     public List<PlayerAnnouncement> getCurrLobbyState(int gameIndex) {
@@ -70,12 +68,19 @@ public class Lobby {
                 gameService.addGame();
             }
         } else {
-            final Map<String, Integer> newEntry = new HashMap<>();
+            final BiMap<String, Integer> newEntry = HashBiMap.create();
             newEntry.put(email, getNewUserId());
             userPartyMap.put(nextGameId, newEntry);
         }
 
         return nextGameId;
+    }
+
+    public synchronized void removePlayer(int partyId, int playerId) {
+        if (userPartyMap.containsKey(partyId) && userPartyMap.get(partyId).containsKey(playerId)) {
+
+        }
+
     }
 
     private Integer getNewUserId() {
