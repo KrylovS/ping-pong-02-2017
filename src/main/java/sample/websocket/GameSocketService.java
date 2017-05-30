@@ -8,6 +8,7 @@ import gameLogic.event_system.messages.PlatformState;
 import gameLogic.event_system.messages.PlayerAnnouncement;
 import org.eclipse.jetty.websocket.api.WebSocketException;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.socket.CloseStatus;
@@ -59,10 +60,13 @@ public class GameSocketService
         return sessions.containsKey(email) && sessions.get(email).isOpen();
     }
 
+    @Nullable
     public String removeUser(@NotNull int partyId, @NotNull int playerId) {
-//        sessions.remove(email);
-        lobby.removePlayer(partyId, playerId);
-        return null;
+        final String email = lobby.removePlayer(partyId, playerId);
+        if (email != null) {
+            sessions.remove(email);
+        }
+        return email;
     }
 
     public void cutDownConnection(@NotNull String email, @NotNull CloseStatus closeStatus) {

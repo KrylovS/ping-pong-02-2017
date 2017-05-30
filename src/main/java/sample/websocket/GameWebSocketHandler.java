@@ -80,11 +80,18 @@ public class GameWebSocketHandler extends TextWebSocketHandler {
 
     @Override
     public void afterConnectionClosed(WebSocketSession webSocketSession, CloseStatus closeStatus) throws Exception {
-        System.out.println("Connection closed");
+        LOGGER.info("Connection closed");
 
         final int partyId = (int) webSocketSession.getAttributes().get(WSDict.PARTY_ID);
         final int playerId = (int) webSocketSession.getAttributes().get(WSDict.PLAYER_ID);
         final String email = gameSocketService.removeUser(partyId, playerId);
+
+        if (email != null) {
+            LOGGER.info("Player " + email + " was successfully removed from the game");
+        } else {
+            LOGGER.info("Nobody to remove");
+        }
+
     }
 
     @Override

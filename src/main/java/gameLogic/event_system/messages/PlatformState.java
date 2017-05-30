@@ -62,6 +62,10 @@ public class PlatformState implements DiscreteRotationInvariant<PlatformState> {
         return isActive;
     }
 
+    public void setActive(boolean value) {
+        isActive = value;
+    }
+
     @Override
     public PlatformState getDiscreteRotation(int stepNum, int totalSteps) {
         final double rotationAngle = 2 * Math.PI / totalSteps * stepNum;

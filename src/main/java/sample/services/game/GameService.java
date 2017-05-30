@@ -67,7 +67,13 @@ public class GameService {
         final GameWorldState initialState = game.getWorldState();
         
         return IntStream.range(0, game.getUserNum()).boxed()
-                .map(i -> initialState.getDiscreteRotation(-i, game.getUserNum()))
+                .map(i -> {
+                    final GameWorldState localState = initialState.getDiscreteRotation(-i, game.getUserNum());
+                    localState.getPlatformsState().forEach(platformState -> platformState.setActive(false));
+                    localState.getPlatformsState().get(0).setActive(true);
+
+                    return localState;
+                })
                 .collect(Collectors.toList());
     }
 

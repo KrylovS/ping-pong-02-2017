@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import gameLogic.common.CommonFunctions;
 import gameLogic.event_system.messages.interfaces.DiscreteRotationInvariant;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -34,6 +35,7 @@ public class GameWorldState implements DiscreteRotationInvariant<GameWorldState>
 
         final List<PlatformState> newPlatformsState = platformsState.stream().
                 map(state -> state.getDiscreteRotation(stepNum, totalSteps))
+                .sorted(Comparator.comparingDouble(PlatformState::getAngle))
                 .collect(Collectors.toList());
 
         return new GameWorldState(

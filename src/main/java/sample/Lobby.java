@@ -4,6 +4,7 @@ import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import gameLogic.config_models.GameConfig;
 import gameLogic.event_system.messages.PlayerAnnouncement;
+import org.jetbrains.annotations.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import sample.services.game.GameService;
@@ -76,10 +77,22 @@ public class Lobby {
         return nextGameId;
     }
 
-    public synchronized void removePlayer(int partyId, int playerId) {
-        if (userPartyMap.containsKey(partyId) && userPartyMap.get(partyId).containsKey(playerId)) {
+    @Nullable
+    public synchronized String removePlayer(int partyId, int playerId) {
+        if (userPartyMap.containsKey(partyId) && userPartyMap.get(partyId).inverse().containsKey(playerId)) {
+            final int playersNum = userPartyMap.get(partyId).size();
+            final String email = userPartyMap.get(partyId).inverse().get(playerId);
 
+            if (playersNum == 1) {
+                userPartyMap.remove(partyId);
+            } else {
+                userPartyMap.get(partyId).inverse().remove(playerId);
+            }
+
+            return email;
         }
+
+        return null;
 
     }
 

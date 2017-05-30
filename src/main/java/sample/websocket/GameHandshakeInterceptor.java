@@ -20,9 +20,8 @@ public class GameHandshakeInterceptor extends HttpSessionHandshakeInterceptor {
         super.beforeHandshake(request, response, wsHandler, attributes);
         final HttpSession session = getSessionShadowed(request);
 
-        final String email;
         if (session != null) {
-            email = (String) session.getAttribute(WSDict.SESSION_ATTRIBUTE);
+            final String email = (String) session.getAttribute(WSDict.SESSION_ATTRIBUTE);
 
             if (email != null) {
                 attributes.put(WSDict.SESSION_ATTRIBUTE, email);
