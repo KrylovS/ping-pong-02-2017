@@ -1,5 +1,8 @@
 package sample;
 
+
+
+
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import gameLogic.config_models.GameConfig;
@@ -7,6 +10,7 @@ import gameLogic.event_system.messages.PlayerAnnouncement;
 import org.jetbrains.annotations.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import sample.services.account.AccountServiceDB;
 import sample.services.game.GameService;
 
 import java.util.*;
@@ -22,6 +26,9 @@ public class Lobby {
 
     @Autowired
     GameService gameService;
+
+    @Autowired
+    AccountServiceDB accountServiceDB;
 
     public Lobby() {
         init();
@@ -93,6 +100,26 @@ public class Lobby {
         }
 
         return null;
+
+    }
+
+
+    private void updateScore(int gameId, int userId, int score) {
+        final Map<Integer, String> idEmailHM = new HashMap<>();
+        for (Map.Entry<String, Integer> e : userPartyMap.get(gameId).entrySet()) {
+            idEmailHM.put(e.getValue(), e.getKey());
+
+        }
+
+        UserProfile userProfile = accountServiceDB.getUser(idEmailHM.get(userId));
+
+        if (userProfile == null) {
+            
+
+        } else {
+            userProfile.setScore(score);
+            accountServiceDB.updateScore(userProfile);
+        }
 
     }
 
