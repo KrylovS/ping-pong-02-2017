@@ -21,4 +21,5 @@ public class GameConfig {
     public static final double MINIMAL_OFFSET = 1;
     public static final double PLATFORM_COLLISION_ACCURACY = 1;
     public static final double SECTOR_COLLISION_ACCURACY = 0.5;
+    public static final int STATE_KEEP_TIME = 1000;
 }
