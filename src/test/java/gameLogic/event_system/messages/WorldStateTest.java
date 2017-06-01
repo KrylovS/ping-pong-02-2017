@@ -33,13 +33,17 @@ public class WorldStateTest extends TestHelper {
                         new double[]{5, 6},
                         1,
                         new double[]{49, 90},
-                        false
+                        false,
+                        null,
+                        null
                 ),
                 new PlatformState(
                         new double[]{5, 6},
                         1,
                         new double[]{49, 90},
-                        false
+                        false,
+                        null,
+                        null
                 )
         );
 

@@ -15,6 +15,8 @@ public class PlatformState implements DiscreteRotationInvariant<PlatformState> {
     private double angle;
     private RealVector velocity;
     private boolean isActive;
+    private int lastMessageId;
+    private int msElapsed;
 
     public PlatformState(RealVector position, double angle, RealVector velocity, boolean isActive) {
         this.position = position;
@@ -28,12 +30,32 @@ public class PlatformState implements DiscreteRotationInvariant<PlatformState> {
             @JsonProperty("position") double[] position,
             @JsonProperty("angle") double angle,
             @JsonProperty("velocity") double[] velocity,
-            @JsonProperty("active") boolean isActive
+            @JsonProperty("active") boolean isActive,
+            @JsonProperty("lastMessageId") Integer lastMessageId,
+            @JsonProperty("msElapsed") Integer msElapsed
     ) {
         this.position = new ArrayRealVector(position);
         this.angle = angle;
         this.velocity = new ArrayRealVector(velocity);
         this.isActive = isActive;
+        this.lastMessageId = lastMessageId;
+        this.msElapsed = msElapsed;
+    }
+
+    public int getLastMessageId() {
+        return lastMessageId;
+    }
+
+    public void setLastMessageId(int value) {
+        lastMessageId = value;
+    }
+
+    public int getMsElapsed() {
+        return msElapsed;
+    }
+
+    public void setMsElapsed(int value) {
+        msElapsed = value;
     }
 
     public RealVector getPosition() {

@@ -112,12 +112,10 @@ public class GameSocketService
                 .collect(Collectors.toList());
     }
 
-    public void updateGamePartyState(Integer partyId, List<GameWorldState> gameWorldStates) {
+    public void updateGamePartyState(Integer partyId, List<Message<GameWorldState>> messageList) {
         transmitTransformedMessage(
                 partyId,
-                gameWorldStates.stream()
-                        .map(state -> new Message<>(WSDict.WORLD_STATE, state))
-                        .collect(Collectors.toList())
+                messageList
         );
     }
 

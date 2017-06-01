@@ -8,6 +8,7 @@ import gameLogic.game.Game;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import sample.websocket.GameSocketService;
+import sample.websocket.Message;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -62,26 +63,14 @@ public class GameService {
         return newId;
     }
 
-    public List<GameWorldState> getGameStateList(int gameId) {
-        final Game game = gameMap.get(gameId);
-        final GameWorldState initialState = game.getWorldState();
-        
-        return IntStream.range(0, game.getUserNum()).boxed()
-                .map(i -> {
-                    final GameWorldState localState = initialState.getDiscreteRotation(-i, game.getUserNum());
-                    localState.getPlatformsState().forEach(platformState -> platformState.setActive(false));
-                    localState.getPlatformsState().get(0).setActive(true);
-
-                    return localState;
-                })
-                .collect(Collectors.toList());
-    }
-
     public void addUserTask(int gameId, int userIndex, PlatformState platformState) {
-        userInputService.submit(() -> gameMap
-                .get(gameId)
-                .getPlatformByIndex(userIndex)
-                .setState(platformState.getDiscreteRotation(userIndex, GameConfig.PLAYERS_NUM)));
+        userInputService.submit(
+                () -> gameMap
+                        .get(gameId)
+//                        .alterPast(userIndex, platformState)
+                        .getPlatformByIndex(userIndex)
+                        .setState(platformState.getDiscreteRotation(userIndex, GameConfig.PLAYERS_NUM))
+        );
     }
 
     private void renderLoop() {
@@ -111,7 +100,11 @@ public class GameService {
     }
 
     private void transmitState(Game game) {
-        gameSocketService.updateGamePartyState(game.getId(), getGameStateList(game.getId()));
+        final Message<GameWorldState> message = game.getWorldStateMessage();
+        game.saveMessage(message);
+        final List<Message<GameWorldState>> messageList = game.getMessageList(message);
+
+        gameSocketService.updateGamePartyState(game.getId(), messageList);
     }
 
 }
