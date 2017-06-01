@@ -5,6 +5,8 @@ package sample.websocket;
  */
 public class WSDict {
     public static final String SESSION_ATTRIBUTE = "email";
+    public static final String SESSION_ID = "sessionId";
+    public static final String SCORE = "score";
     public static final String PLAYER_ID = "playerId";
     public static final String PARTY_ID = "partyId";
     public static final String ANNOUNCE = "anounce";

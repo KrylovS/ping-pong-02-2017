@@ -26,6 +26,8 @@ public class GameHandshakeInterceptor extends HttpSessionHandshakeInterceptor {
             if (email != null) {
                 attributes.put(WSDict.SESSION_ATTRIBUTE, email);
             }
+
+            attributes.put(WSDict.SESSION_ID,session.getId());
         }
 
         return true;
@@ -35,7 +37,8 @@ public class GameHandshakeInterceptor extends HttpSessionHandshakeInterceptor {
     private HttpSession getSessionShadowed(ServerHttpRequest request) {
         if (request instanceof ServletServerHttpRequest) {
             final ServletServerHttpRequest serverRequest = (ServletServerHttpRequest) request;
-            return serverRequest.getServletRequest().getSession(isCreateSession());
+            return serverRequest.getServletRequest().getSession();
+            //return serverRequest.getServletRequest().getSession(isCreateSession());
         }
         return null;
     }

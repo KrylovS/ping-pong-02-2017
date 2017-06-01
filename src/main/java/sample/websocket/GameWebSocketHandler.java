@@ -9,6 +9,7 @@ import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
 import sample.services.account.AccountServiceDB;
+import sample.services.score.ScoreService;
 
 import javax.naming.AuthenticationException;
 
@@ -26,12 +27,16 @@ public class GameWebSocketHandler extends TextWebSocketHandler {
     private AccountServiceDB accountServiceDB;
     @NotNull
     private final GameSocketService gameSocketService;
+    @NotNull
+    private final ScoreService scoreService;
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 
-    public GameWebSocketHandler(@NotNull AccountServiceDB accountServiceDB, @NotNull GameSocketService gameSocketService) {
+    public GameWebSocketHandler(@NotNull AccountServiceDB accountServiceDB, @NotNull GameSocketService gameSocketService,
+                                @NotNull ScoreService scoreService) {
         this.accountServiceDB = accountServiceDB;
         this.gameSocketService = gameSocketService;
+        this.scoreService = scoreService;
     }
 
     @Override
@@ -44,7 +49,11 @@ public class GameWebSocketHandler extends TextWebSocketHandler {
             LOGGER.info("Random email generated");
         }
 
+        String sessioId = (String) webSocketSession.getAttributes().get(WSDict.SESSION_ID);
+        scoreService.addSession(email, sessioId);
+
         gameSocketService.registerUser(email, webSocketSession);
+
     }
 
     @Override
@@ -84,15 +93,22 @@ public class GameWebSocketHandler extends TextWebSocketHandler {
 
         final int partyId = (int) webSocketSession.getAttributes().get(WSDict.PARTY_ID);
         final int playerId = (int) webSocketSession.getAttributes().get(WSDict.PLAYER_ID);
+
+        //final int score = (int) webSocketSession.getAttributes().get(WSDict.SCORE);
+        int score = 1; // stub
+
         final String email = gameSocketService.removeUser(partyId, playerId);
 
         if (email != null) {
+            scoreService.addScore(email, score);
             LOGGER.info("Player " + email + " was successfully removed from the game");
         } else {
             LOGGER.info("Nobody to remove");
         }
 
     }
+
+
 
     @Override
     public boolean supportsPartialMessages() {

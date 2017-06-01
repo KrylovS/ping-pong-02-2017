@@ -103,26 +103,6 @@ public class Lobby {
 
     }
 
-
-    private void updateScore(int gameId, int userId, int score) {
-        final Map<Integer, String> idEmailHM = new HashMap<>();
-        for (Map.Entry<String, Integer> e : userPartyMap.get(gameId).entrySet()) {
-            idEmailHM.put(e.getValue(), e.getKey());
-
-        }
-
-        UserProfile userProfile = accountServiceDB.getUser(idEmailHM.get(userId));
-
-        if (userProfile == null) {
-            
-
-        } else {
-            userProfile.setScore(score);
-            accountServiceDB.updateScore(userProfile);
-        }
-
-    }
-
     private Integer getNewUserId() {
         return userIdCounter.getAndIncrement() % GameConfig.PLAYERS_NUM;
     }
