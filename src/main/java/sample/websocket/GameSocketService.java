@@ -48,7 +48,7 @@ public class GameSocketService
                 SectorCollision.class.getName(),
                 event -> {
                     final SectorCollision realEvent = (SectorCollision) event;
-                    this.handleUserSectorCollision(realEvent.getGameId(), realEvent.getUserIndex());
+                    this.handleUserSectorCollision(realEvent.getGameId(), realEvent.getUserIndex(), realEvent.isVictory());
                     return null;
                 }
         );
@@ -146,11 +146,11 @@ public class GameSocketService
         transmitSameMessage(partyId, new Message<>(WSDict.START_GAME, ""));
     }
 
-    private void handleUserSectorCollision(int gameId, int userIndex) {
+    private void handleUserSectorCollision(int gameId, int userIndex, boolean isSuccess) {
         final List<Message<GameTermination>> messages = IntStream.range(0, GameConfig.PLAYERS_NUM).boxed()
                 .map(i -> {
                     final GameTermination gameTermination = new GameTermination(
-                            false,
+                            isSuccess,
                             CommonFunctions.getCircularOffset(userIndex, -i, GameConfig.PLAYERS_NUM),
                             System.currentTimeMillis()
                     );

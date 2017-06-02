@@ -231,10 +231,29 @@ public class GameWorld implements Statefull<GameWorldState> {
             collidingBall.bounceNorm(norm, sector.getVelocity());
             lastCollidedObject = sector;
 
+            final int loserCount = this.userSectors.stream()
+                    .map(sec -> sec.isNeutral() ? 1 : 0)
+                    .reduce(0, (curr, val) -> curr + val);
+
+            if (loserCount == GameConfig.PLAYERS_NUM - 1) {
+                return;
+            }
+
             sector.setNeutral(true);
 
-            final SectorCollision event = new SectorCollision(sector.getId(), id);
-            EventBus.dispatchEvent(SectorCollision.class.getCanonicalName(), event);
+            if (loserCount == GameConfig.PLAYERS_NUM - 2) {
+                final int winner = userSectors.stream()
+                        .map(sec -> new Pair<>(sec.getId(), sec.isNeutral()))
+                        .filter(pair -> !pair.getSecond())
+                        .findFirst()
+                        .get().getFirst();
+                final SectorCollision winnerEvent = new SectorCollision(winner, id, true);
+                EventBus.dispatchEvent(SectorCollision.class.getName(), winnerEvent);
+            }
+
+
+            final SectorCollision event = new SectorCollision(sector.getId(), id, false);
+            EventBus.dispatchEvent(SectorCollision.class.getName(), event);
         }
     }
 
