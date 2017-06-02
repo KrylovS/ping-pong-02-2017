@@ -83,7 +83,7 @@ public class UserController {
         if(accountService.login(body.getEmail(), body.getPassword())) {
             final UserProfile user = accountService.getUser(body.getEmail());
 
-            Integer score = scoreService.getScore(httpSession.getId());
+            final Integer score = scoreService.getScore(httpSession.getId());
             if( score != null) {
                 user.setScore(score);
                 accountService.updateScore(user);

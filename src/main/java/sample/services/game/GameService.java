@@ -68,7 +68,6 @@ public class GameService {
         userInputService.submit(
                 () -> gameMap
                         .get(gameId)
-//                        .alterPast(userIndex, platformState)
                         .getPlatformByIndex(userIndex)
                         .setState(platformState.getDiscreteRotation(userIndex, GameConfig.PLAYERS_NUM))
         );

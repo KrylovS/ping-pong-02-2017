@@ -68,14 +68,18 @@ public class Triangle {
     }
 
     public boolean contains(RealVector point) {
-        final double x = point.getEntry(0);
-        final double y = point.getEntry(1) + height;
+//        final double x = point.getEntry(0);
+//        final double y = point.getEntry(1) + height;
+        final RealVector basePoint = toBottomCoordinateSystem(point);
 
-        return isInSector(new ArrayRealVector(new double[]{x, y})) && aboveBottom(y) && inHorRange(x);
+//        return isInSector(new ArrayRealVector(new double[]{x, y})) && aboveBottom(y) && inHorRange(x);
+        return isInSector(point) && aboveBottom(basePoint.getEntry(1)) && inHorRange(basePoint.getEntry(0));
     }
 
     public boolean isInSector(RealVector point) {
-        return underLeftSide(point) && underRightSide(point);
+        final RealVector basePoint = toBottomCoordinateSystem(point);
+        return underLeftSide(basePoint) && underRightSide(basePoint);
+//        return underLeftSide(point) && underRightSide(point);
     }
 
     private boolean inHorRange(double x) {
@@ -98,5 +102,12 @@ public class Triangle {
         final double y = point.getEntry(1);
 
         return y < height * (1 - x / halfWidth);
+    }
+
+    private RealVector toBottomCoordinateSystem(RealVector point) {
+        return new ArrayRealVector(new double[]{
+                point.getEntry(0),
+                point.getEntry(1) + height
+        });
     }
 }

@@ -104,4 +104,9 @@ public class Platform extends GameComponent implements Polygon, PolygonObstacle,
                 .get(0)
                 .getFirst();
     }
+
+    @Override
+    public RealVector getNormDirection(RealVector colliderPosition, RealVector collisionPoint) {
+        return colliderPosition.subtract(collisionPoint);
+    }
 }

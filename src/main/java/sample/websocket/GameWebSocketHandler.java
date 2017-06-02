@@ -50,11 +50,10 @@ public class GameWebSocketHandler extends TextWebSocketHandler {
             LOGGER.info("Random email generated");
         }
 
-        String sessioId = (String) webSocketSession.getAttributes().get(WSDict.SESSION_ID);
-        scoreService.addSession(email, sessioId);
+        final String sessionId = (String) webSocketSession.getAttributes().get(WSDict.SESSION_ID);
+        scoreService.addSession(email, sessionId);
 
         gameSocketService.registerUser(email, webSocketSession);
-
     }
 
     @Override
@@ -67,7 +66,7 @@ public class GameWebSocketHandler extends TextWebSocketHandler {
 
     @SuppressWarnings("OverlyBroadCatchBlock")
     private void handleMessage(int partyId, int playerId, TextMessage text) {
-        System.out.println("Handle message");
+//        System.out.println("Handle message");
         try {
             final ObjectNode message = objectMapper.readValue(text.getPayload(), ObjectNode.class);
             final String messageType = message.get("type").asText();
@@ -104,11 +103,11 @@ public class GameWebSocketHandler extends TextWebSocketHandler {
         final int playerId = (int) webSocketSession.getAttributes().get(WSDict.PLAYER_ID);
 
         //final int score = (int) webSocketSession.getAttributes().get(WSDict.SCORE);
-        int score = 1; // stub
 
         final String email = gameSocketService.removeUser(partyId, playerId);
 
         if (email != null) {
+            final int score = 1; // stub
             scoreService.addScore(email, score);
             LOGGER.info("Player " + email + " was successfully removed from the game");
         } else {

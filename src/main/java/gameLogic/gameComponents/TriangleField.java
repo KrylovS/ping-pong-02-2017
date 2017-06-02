@@ -88,11 +88,24 @@ public class TriangleField extends GameComponent implements Area, PolygonObstacl
 
     @Override
     public RealVector getClosestPoint(RealVector referencePoint) {
-        final List<RealVector> globalBasePoints = triangle.getBasePoints().stream()
-                .map(this::toGlobals)
-                .collect(Collectors.toList());
-        final Line baseLine = new Line(globalBasePoints.get(0), globalBasePoints.get(1));
-        return baseLine.getClosestPoint(referencePoint);
+        if (!checkFieldEscape(referencePoint)) {
+            final List<RealVector> globalBasePoints = triangle.getBasePoints().stream()
+                    .map(this::toGlobals)
+                    .collect(Collectors.toList());
+            final Line baseLine = new Line(globalBasePoints.get(0), globalBasePoints.get(1));
+            return baseLine.getClosestPoint(referencePoint);
+        } else {
+            return referencePoint;
+        }
+    }
 
+    @Override
+    public RealVector getNormDirection(RealVector colliderPosition, RealVector collisionPoint) {
+        return this.toGlobalsWithoutOffset(new ArrayRealVector(new double[]{0, 1}));
+    }
+
+    private boolean checkFieldEscape(RealVector globalPoint) {
+        final RealVector localPoint = toLocals(globalPoint);
+        return !triangle.contains(localPoint) && triangle.isInSector(localPoint);
     }
 }

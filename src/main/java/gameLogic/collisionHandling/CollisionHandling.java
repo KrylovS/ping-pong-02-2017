@@ -92,8 +92,9 @@ public class CollisionHandling {
         final RealVector relVelocity = collider.getRelativeVelocity(obstacle);
         final RealVector relPosition = relVelocity.mapMultiply(time).add(collider.getPosition());
         final RealVector closestPoint = obstacle.getClosestPoint(relPosition);
-        final RealVector norm = relPosition.subtract(closestPoint);
-        final double distance = norm.getNorm();
+        final RealVector norm = obstacle.getNormDirection(relPosition, closestPoint);
+
+        final double distance = relPosition.subtract(closestPoint).getNorm();
 
         if (distance <= collider.getRadius()) {
             return new CollisionInfo(time, closestPoint, norm.unitVector(), obstacle);
