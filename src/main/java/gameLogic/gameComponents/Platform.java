@@ -3,6 +3,7 @@ package gameLogic.gameComponents;
 import gameLogic.collisionHandling.interfaces.PolygonObstacle;
 import gameLogic.common.Pair;
 import gameLogic.event_system.messages.PlatformState;
+import gameLogic.event_system.messages.PlatformStateUpdate;
 import gameLogic.gameComponents.interfaces.Polygon;
 import gameLogic.gameComponents.interfaces.Shapefull;
 import gameLogic.gameComponents.interfaces.Statefull;
@@ -35,6 +36,10 @@ public class Platform extends GameComponent implements Polygon, PolygonObstacle,
 
     public boolean getActive() {
         return isActive;
+    }
+
+    public synchronized void applyUpdate(PlatformStateUpdate platformStateUpdate) {
+        moveByWithConstraints(platformStateUpdate.getOffset(), platformStateUpdate.getVelocity());
     }
 
     @Override

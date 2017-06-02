@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import gameLogic.config_models.GameConfig;
 import gameLogic.event_system.messages.GameWorldState;
 import gameLogic.event_system.messages.PlatformState;
+import gameLogic.event_system.messages.PlatformStateUpdate;
 import gameLogic.event_system.messages.PlayerAnnouncement;
 import org.eclipse.jetty.websocket.api.WebSocketException;
 import org.jetbrains.annotations.NotNull;
@@ -95,8 +96,12 @@ public class GameSocketService
         }
     }
 
-    public void updatePlatformState(int partyId, int playerId, PlatformState platformState) {
-        gameService.addUserTask(partyId, playerId, platformState);
+    public void setPlatformState(int partyId, int playerId, PlatformState platformState) {
+        gameService.addPlatformSetTask(partyId, playerId, platformState);
+    }
+
+    public void updatePlatformState(int partyId, int playerId, PlatformStateUpdate platformStateUpdate) {
+        gameService.addPlatformUpdateTask(partyId, playerId, platformStateUpdate);
     }
 
     public List<Message<List<PlayerAnnouncement>>> getLobbyState(Integer partyId) {

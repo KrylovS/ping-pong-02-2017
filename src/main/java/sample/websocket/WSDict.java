@@ -12,4 +12,5 @@ public class WSDict {
     public static final String GET_READY = "GetReadyEvent";
     public static final String START_GAME = "GameStartEvent";
     public static final String PLATFORM_MOVED = "PlatformMovedEvent";
+    public static final String PLATFORM_UPDATE = "PlatformUpdateEvent";
 }

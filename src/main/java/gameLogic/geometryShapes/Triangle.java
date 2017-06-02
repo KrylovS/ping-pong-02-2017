@@ -71,7 +71,7 @@ public class Triangle {
         final double x = point.getEntry(0);
         final double y = point.getEntry(1) + height;
 
-        return isInSector(point) && aboveBottom(y) && inHorRange(x);
+        return isInSector(new ArrayRealVector(new double[]{x, y})) && aboveBottom(y) && inHorRange(x);
     }
 
     public boolean isInSector(RealVector point) {

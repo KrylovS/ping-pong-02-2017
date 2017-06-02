@@ -9,10 +9,10 @@ import org.apache.commons.math3.linear.RealVector;
 public class GameConfig {
     public static final int MILLISECONDS_PER_SECOND = 1000;
     public static final int RENDER_FRAME_RATE = 60;
-    public static final double WS_UPDATE_FRAME_RATE = 20;
+    public static final double WS_UPDATE_FRAME_RATE = 40;
     public static final double FIELD_SIZE = 100;
     public static final int PLAYERS_NUM = 4;
-    public static final double FILL_FACTOR = 0.8;
+    public static final double FILL_FACTOR = 0.7;
     public static final double RENDER_TIME = MILLISECONDS_PER_SECOND / RENDER_FRAME_RATE;
     public static final double WS_TIME = MILLISECONDS_PER_SECOND / WS_UPDATE_FRAME_RATE;
     public static final double BALL_RELATIVE_RADIUS = 0.05;

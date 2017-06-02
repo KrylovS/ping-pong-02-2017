@@ -3,6 +3,7 @@ package sample.websocket;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import gameLogic.event_system.messages.PlatformState;
+import gameLogic.event_system.messages.PlatformStateUpdate;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
@@ -60,11 +61,19 @@ public class GameWebSocketHandler extends TextWebSocketHandler {
         System.out.println("Handle message");
         try {
             final ObjectNode message = objectMapper.readValue(text.getPayload(), ObjectNode.class);
-            if (message.get("type").asText().equals(WSDict.PLATFORM_MOVED)) {
+            final String messageType = message.get("type").asText();
+
+            if (messageType.equals(WSDict.PLATFORM_MOVED)) {
+                gameSocketService.setPlatformState(
+                        partyId,
+                        playerId,
+                        objectMapper.readValue(message.get("data").toString(), PlatformState.class)
+                );
+            } else if (messageType.equals(WSDict.PLATFORM_UPDATE)) {
                 gameSocketService.updatePlatformState(
                         partyId,
                         playerId,
-                        objectMapper.readValue(message.get("data").toString(), PlatformState.class)  // TODO make something more elegant
+                        objectMapper.readValue(message.get("data").toString(), PlatformStateUpdate.class)
                 );
             }
 

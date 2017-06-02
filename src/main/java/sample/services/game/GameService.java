@@ -4,6 +4,7 @@ package sample.services.game;
 import gameLogic.config_models.GameConfig;
 import gameLogic.event_system.messages.GameWorldState;
 import gameLogic.event_system.messages.PlatformState;
+import gameLogic.event_system.messages.PlatformStateUpdate;
 import gameLogic.game.Game;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -63,13 +64,22 @@ public class GameService {
         return newId;
     }
 
-    public void addUserTask(int gameId, int userIndex, PlatformState platformState) {
+    public void addPlatformSetTask(int gameId, int userIndex, PlatformState platformState) {
         userInputService.submit(
                 () -> gameMap
                         .get(gameId)
 //                        .alterPast(userIndex, platformState)
                         .getPlatformByIndex(userIndex)
                         .setState(platformState.getDiscreteRotation(userIndex, GameConfig.PLAYERS_NUM))
+        );
+    }
+
+    public void addPlatformUpdateTask(int gameId, int userIndex, PlatformStateUpdate platformStateUpdate) {
+        userInputService.submit(
+                () -> gameMap
+                        .get(gameId)
+                        .getPlatformByIndex(userIndex)
+                        .applyUpdate(platformStateUpdate.getDiscreteRotation(userIndex, GameConfig.PLAYERS_NUM))
         );
     }
 

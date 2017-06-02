@@ -15,6 +15,23 @@ public class TriangleFieldTest extends TestHelper {
     private final Logger logger = Logger.getLogger(TriangleFieldTest.class.getName());
 
     @Test
+    public void testContains() {
+        logger.info("Testing TriangleField.contains");
+        final TriangleField sector = new TriangleField(100, Math.PI / 4, true);
+
+        final RealVector topPointIn = new ArrayRealVector(new double[]{0, -0.1});
+        assertTrue(sector.containsGlobalPoint(topPointIn));
+        logger.info("Top point in OK");
+
+        final RealVector topPointOut = new ArrayRealVector(new double[]{0, 0.1});
+        assertFalse(sector.containsGlobalPoint(topPointOut));
+        logger.info("Top point out OK");
+
+
+        logger.info("OK");
+    }
+
+    @Test
     public void testGetBottomNorm() {
         logger.info("Testing TriangleField.getBottomNorm");
         final TriangleField sector = new TriangleField(100, Math.PI / 2, true);
