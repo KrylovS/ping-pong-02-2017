@@ -7,6 +7,10 @@ import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import gameLogic.config_models.GameConfig;
 import gameLogic.event_system.messages.PlayerAnnouncement;
+import gameLogic.event_system.messages.ScoreMessage;
+import gameLogic.event_system.messages.SectorCollision;
+import gameLogic.game.EventBus;
+import gameLogic.game.Game;
 import org.jetbrains.annotations.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -32,11 +36,23 @@ public class Lobby {
 
     public Lobby() {
         init();
+        addListeners();
     }
 
     public void init() {
         userIdCounter = new AtomicInteger();
         userPartyMap = new ConcurrentHashMap<>();
+    }
+
+    public void addListeners() {
+        EventBus.addEventListener(
+                SectorCollision.class.getName(),
+                event -> {
+                    final SectorCollision realEvent = (SectorCollision) event;
+                    this.handleSectorCollisionEvent(realEvent.getGameId(), realEvent.getUserIndex(), realEvent.isVictory());
+                    return null;
+                }
+        );
     }
 
     public void reset() {
@@ -105,5 +121,10 @@ public class Lobby {
 
     private Integer getNewUserId() {
         return userIdCounter.getAndIncrement() % GameConfig.PLAYERS_NUM;
+    }
+
+    private void handleSectorCollisionEvent(int gameId, int userIndex, boolean isVictory) {
+        final String email = userPartyMap.get(gameId).inverse().get(userIndex);
+        EventBus.dispatchEvent(ScoreMessage.class.getName(), new ScoreMessage(email, isVictory));
     }
 }
