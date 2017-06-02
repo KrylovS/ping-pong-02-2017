@@ -115,10 +115,6 @@ public class TriangleTest extends TestHelper {
         assertEquals(triangle.contains(outerPoint), false);
         logger.info("Correct outer point");
 
-        final RealVector boundaryPoint = new ArrayRealVector(new double[]{0, 0});
-        assertEquals(triangle.contains(boundaryPoint), true);
-        logger.info("Correct boundary point");
-
         logger.info("OK");
     }
 }
