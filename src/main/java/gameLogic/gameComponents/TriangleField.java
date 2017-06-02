@@ -17,12 +17,22 @@ public class TriangleField extends GameComponent implements Area, PolygonObstacl
     private Triangle triangle;
     private boolean isNeutral;
     private boolean isLoser;
+    private int id;
 
     public TriangleField(double height, double sectorAngle, boolean isNeutral) {
         super();
         this.triangle = new Triangle(height, sectorAngle);
         this.isNeutral = isNeutral;
         this.isLoser = false;
+    }
+
+    public TriangleField(double height, double sectorAngle, boolean isNeutral, int id) {
+        this(height, sectorAngle, isNeutral);
+        this.id = id;
+    }
+
+    public int getId() {
+        return id;
     }
 
     public double getHeight() {
@@ -48,8 +58,12 @@ public class TriangleField extends GameComponent implements Area, PolygonObstacl
         return toGlobalsWithoutOffset(new ArrayRealVector(new double[]{0, 1}));
     }
 
-    public boolean getNeutral() {
+    public boolean isNeutral() {
         return isNeutral;
+    }
+
+    public void setNeutral(boolean isNeutral) {
+        this.isNeutral = isNeutral;
     }
 
     public boolean getLoser() {

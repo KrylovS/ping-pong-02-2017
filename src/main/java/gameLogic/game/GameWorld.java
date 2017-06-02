@@ -8,6 +8,7 @@ import gameLogic.common.Pair;
 import gameLogic.config_models.GameConfig;
 import gameLogic.config_models.PlatformConfig;
 import gameLogic.event_system.messages.GameWorldState;
+import gameLogic.event_system.messages.SectorCollision;
 import gameLogic.gameComponents.*;
 import gameLogic.gameComponents.interfaces.Statefull;
 import org.apache.commons.math3.linear.RealVector;
@@ -21,19 +22,16 @@ import java.util.stream.IntStream;
 
 
 public class GameWorld implements Statefull<GameWorldState> {
-    //TODO add event bus wiring
-
     private int userNum;
     private double sectorAngle;
     private double sectorHeight;
     private double ballRadius;
+    private int id;
     private List<TriangleField> userSectors;
     private List<TriangleField> neutralSectors;
     private List<Platform> platforms;
 
     private Ball ball;
-
-    //TODO add config loading
 
     private PolygonObstacle lastCollidedObject;
 
@@ -51,6 +49,15 @@ public class GameWorld implements Statefull<GameWorldState> {
         initSectors();
         initPlatforms();
         initBall();
+    }
+
+    public GameWorld(int userNum, double sectorHeight, double ballRadius, int id) {
+        this(userNum, sectorHeight, ballRadius);
+        this.id = id;
+    }
+
+    public int getId() {
+        return id;
     }
 
     public int getUserNum() {
@@ -140,7 +147,7 @@ public class GameWorld implements Statefull<GameWorldState> {
                     break;
                 case "sector":
                     final TriangleField sector = (TriangleField) firstCollisionData.getFirst().getObstacle();
-                    if (sector.getNeutral()) {
+                    if (sector.isNeutral()) {
                         handleNeutralSectorCollision(
                                 firstCollisionData.getFirst().getObstacle(),
                                 ball,
@@ -190,7 +197,7 @@ public class GameWorld implements Statefull<GameWorldState> {
     private void initSectors() {
         userSectors = IntStream.range(0, userNum).boxed()
                 .map(i -> {
-                    final TriangleField field = new TriangleField(sectorHeight, sectorAngle, false);
+                    final TriangleField field = new TriangleField(sectorHeight, sectorAngle, false, i);
                     field.rotateBy(2 * sectorAngle * i);
                     return field;
                 })
@@ -198,7 +205,7 @@ public class GameWorld implements Statefull<GameWorldState> {
 
         neutralSectors = IntStream.range(0, userNum).boxed()
                 .map(i -> {
-                    final TriangleField field = new TriangleField(sectorHeight, sectorAngle, true);
+                    final TriangleField field = new TriangleField(sectorHeight, sectorAngle, true, i);
                     field.rotateBy(sectorAngle * (2 * i + 1));
                     return field;
                 })
@@ -217,12 +224,17 @@ public class GameWorld implements Statefull<GameWorldState> {
         ball = new Ball(ballRadius);
     }
 
-    private void handleUserSectorCollision(PolygonObstacle sector, Ball collidingBall, RealVector norm) {
+    private void handleUserSectorCollision(PolygonObstacle obstacle, Ball collidingBall, RealVector norm) {
+        final TriangleField sector = (TriangleField) obstacle;
+
         if (!sector.equals(lastCollidedObject)) {
             collidingBall.bounceNorm(norm, sector.getVelocity());
             lastCollidedObject = sector;
 
-            //TODO add event dispatching
+            sector.setNeutral(true);
+
+            final SectorCollision event = new SectorCollision(sector.getId(), id);
+            EventBus.dispatchEvent(SectorCollision.class.getCanonicalName(), event);
         }
     }
 

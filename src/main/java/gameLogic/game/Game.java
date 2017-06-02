@@ -5,6 +5,7 @@ import gameLogic.config_models.GameConfig;
 import gameLogic.event_system.messages.GameWorldState;
 import gameLogic.event_system.messages.PlatformState;
 import gameLogic.gameComponents.Platform;
+import gameLogic.gameComponents.TriangleField;
 import org.jetbrains.annotations.Nullable;
 import sample.websocket.Message;
 import sample.websocket.WSDict;
@@ -130,8 +131,16 @@ public class Game {
         return world.getUserNum();
     }
 
+    public boolean isLoser(int userIndex) {
+        return this.world.getUserSectors().get(userIndex).isNeutral();
+    }
+
     public Platform getPlatformByIndex(int index) {
         return CommonFunctions.getByCircularIndex(world.getPlatforms(), index);
+    }
+
+    public TriangleField getUserSectorByIndex(int index) {
+        return CommonFunctions.getByCircularIndex(world.getUserSectors(), index);
     }
 
     public void makeIteration(double time) {
@@ -142,7 +151,7 @@ public class Game {
         final double sectorHeight = GameConfig.FIELD_SIZE * GameConfig.FILL_FACTOR / 2;
         final double ballRadius = GameConfig.BALL_RELATIVE_RADIUS * sectorHeight;
 
-        world = new GameWorld(GameConfig.PLAYERS_NUM, sectorHeight, ballRadius);
+        world = new GameWorld(GameConfig.PLAYERS_NUM, sectorHeight, ballRadius, id);
         world.getBall().setVelocity(GameConfig.BALL_VELOCITY);  // TODO add randomization
     }
 

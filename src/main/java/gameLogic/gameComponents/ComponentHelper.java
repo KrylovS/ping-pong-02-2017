@@ -20,6 +20,7 @@ public class ComponentHelper {
         final double platformWidth = aspectRatio * platformLength;
 
         final Platform platform = new Platform(platformLength, platformWidth);
+        platform.setId(triangleField.getId());
 
         // using such coordinates because triangleField coordinate system origin is in the topmost corner.
         final RealVector position = triangleField.toGlobals(

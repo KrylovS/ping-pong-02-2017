@@ -19,11 +19,20 @@ import java.util.stream.IntStream;
 public class Platform extends GameComponent implements Polygon, PolygonObstacle, Statefull<PlatformState>, Shapefull<Rectangle> {
     private Rectangle rectangle;
     private boolean isActive;
+    private int id;
 
     public Platform(double length, double width, boolean isActive) {
         super();
         this.rectangle = new Rectangle(length, width);
         this.isActive = isActive;
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
     }
 
     public Platform(double length, double width) {

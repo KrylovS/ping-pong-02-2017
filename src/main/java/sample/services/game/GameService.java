@@ -1,17 +1,16 @@
 package sample.services.game;
 
 
+import gameLogic.common.CommonFunctions;
 import gameLogic.config_models.GameConfig;
-import gameLogic.event_system.messages.GameWorldState;
-import gameLogic.event_system.messages.PlatformState;
-import gameLogic.event_system.messages.PlatformStateUpdate;
+import gameLogic.event_system.messages.*;
+import gameLogic.game.EventBus;
 import gameLogic.game.Game;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import sample.websocket.GameSocketService;
 import sample.websocket.Message;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -74,12 +73,18 @@ public class GameService {
     }
 
     public void addPlatformUpdateTask(int gameId, int userIndex, PlatformStateUpdate platformStateUpdate) {
-        userInputService.submit(
-                () -> gameMap
-                        .get(gameId)
-                        .getPlatformByIndex(userIndex)
-                        .applyUpdate(platformStateUpdate.getDiscreteRotation(userIndex, GameConfig.PLAYERS_NUM))
-        );
+        final Game game = gameMap.get(gameId);
+
+        if (!game.isLoser(userIndex)) {
+            userInputService.submit(
+                    () -> gameMap
+                            .get(gameId)
+                            .getPlatformByIndex(userIndex)
+                            .applyUpdate(platformStateUpdate.getDiscreteRotation(userIndex, GameConfig.PLAYERS_NUM))
+            );
+        }
+
+
     }
 
     private void renderLoop() {
@@ -115,5 +120,4 @@ public class GameService {
 
         gameSocketService.updateGamePartyState(game.getId(), messageList);
     }
-
 }
