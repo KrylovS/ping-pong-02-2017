@@ -5,5 +5,6 @@ CREATE TABLE IF NOT EXISTS "User" (
   email VARCHAR(256) UNIQUE NOT NULL,
   password VARCHAR(256) NOT NULL,
   score INTEGER,
-  rating INTEGER
+  rating INTEGER,
+  party INTEGER DEFAULT 0
 );

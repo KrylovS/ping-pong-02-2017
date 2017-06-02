@@ -102,8 +102,12 @@ public class AccountServiceDB implements AccountServiceInterface {
     @Override
     public UserProfile updateScore(@NotNull UserProfile userProfile) {
         try {
-            jdbcTemplate.update("UPDATE \"User\" SET score = ? WHERE LOWER(email) = LOWER(?)",
+            jdbcTemplate.update("UPDATE \"User\" SET score = score + ? WHERE LOWER(email) = LOWER(?)",
                     userProfile.getScore(), userProfile.getEmail());
+            jdbcTemplate.update("UPDATE \"User\" SET party = party + 1 WHERE LOWER(email) = LOWER(?)",
+                    userProfile.getEmail());
+            jdbcTemplate.update("UPDATE \"User\" SET rating = floor(100 * score / party) WHERE LOWER(email) = LOWER(?)",
+                    userProfile.getEmail());
             return getUser(userProfile.getEmail());
         } catch (DataAccessException e) {
             logger.log(Level.WARNING, "Exception : ", e);

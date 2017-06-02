@@ -9,6 +9,7 @@ import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
+import sample.UserProfile;
 import sample.services.account.AccountServiceDB;
 import sample.services.score.ScoreService;
 
@@ -108,7 +109,13 @@ public class GameWebSocketHandler extends TextWebSocketHandler {
 
         if (email != null) {
             final int score = 1; // stub
-            scoreService.addScore(email, score);
+            final UserProfile userProfile = accountServiceDB.getUser(email);
+            if (userProfile != null) {
+                userProfile.setScore(score);
+                accountServiceDB.updateScore(userProfile);
+            } else {
+                scoreService.addScore(email, score);
+            }
             LOGGER.info("Player " + email + " was successfully removed from the game");
         } else {
             LOGGER.info("Nobody to remove");
