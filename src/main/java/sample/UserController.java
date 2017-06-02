@@ -7,6 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import sample.services.account.AccountServiceDB;
 import sample.services.account.AccountServiceInterface;
+import sample.services.score.ScoreService;
 
 import javax.servlet.http.HttpSession;
 import java.util.ArrayList;
@@ -21,6 +22,10 @@ import java.util.List;
 public class UserController {
     @NotNull
     private final AccountServiceInterface accountService;
+
+
+    @NotNull
+    private final ScoreService scoreService;
     
     @PostMapping(path = "/api/user/registration")
     public ResponseEntity<ResponseWrapper<UserProfile>> register(@RequestBody UserProfile body,
@@ -40,6 +45,13 @@ public class UserController {
 
         if (!errorList.isEmpty()) {
             return new ResponseEntity<>(new ResponseWrapper<>(errorList, null), HttpStatus.BAD_REQUEST);
+        }
+
+        Integer score = scoreService.getScore(httpSession.getId());
+        if( score != null) {
+            body.setScore(score);
+        } else {
+            body.setScore(0);
         }
 
         final UserProfile userProfile = accountService.register(body);
@@ -67,8 +79,16 @@ public class UserController {
             return new ResponseEntity<>(new ResponseWrapper<>(errorList, null), HttpStatus.BAD_REQUEST);
         }
 
+
         if(accountService.login(body.getEmail(), body.getPassword())) {
             final UserProfile user = accountService.getUser(body.getEmail());
+
+            Integer score = scoreService.getScore(httpSession.getId());
+            if( score != null) {
+                user.setScore(score);
+                accountService.updateScore(user);
+            }
+
             httpSession.setAttribute("email", body.getEmail());
             return new ResponseEntity<>(new ResponseWrapper<>(null, user.getLogin()), HttpStatus.OK);
         }
@@ -196,8 +216,9 @@ public class UserController {
         return ("field " + fieldName + " is empty");
     }
 
-    public UserController(@NotNull AccountServiceDB accountService) {
+    public UserController(@NotNull AccountServiceDB accountService, @NotNull ScoreService scoreService) {
         this.accountService = accountService;
+        this.scoreService = scoreService;
     }
 }
 
