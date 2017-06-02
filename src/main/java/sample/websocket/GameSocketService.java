@@ -2,11 +2,10 @@ package sample.websocket;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import gameLogic.common.CommonFunctions;
 import gameLogic.config_models.GameConfig;
-import gameLogic.event_system.messages.GameWorldState;
-import gameLogic.event_system.messages.PlatformState;
-import gameLogic.event_system.messages.PlatformStateUpdate;
-import gameLogic.event_system.messages.PlayerAnnouncement;
+import gameLogic.event_system.messages.*;
+import gameLogic.game.EventBus;
 import org.eclipse.jetty.websocket.api.WebSocketException;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -39,6 +38,21 @@ public class GameSocketService
     private Lobby lobby;
     @Autowired
     private GameService gameService;
+
+    public GameSocketService() {
+        setListeners();
+    }
+
+    public void setListeners() {
+        EventBus.addEventListener(
+                SectorCollision.class.getName(),
+                event -> {
+                    final SectorCollision realEvent = (SectorCollision) event;
+                    this.handleUserSectorCollision(realEvent.getGameId(), realEvent.getUserIndex());
+                    return null;
+                }
+        );
+    }
 
     public void registerUser(@NotNull String email, @NotNull WebSocketSession webSocketSession) {
         sessions.put(email, webSocketSession);
@@ -130,6 +144,21 @@ public class GameSocketService
 
     public void transmitGameStartMessage(Integer partyId) {
         transmitSameMessage(partyId, new Message<>(WSDict.START_GAME, ""));
+    }
+
+    private void handleUserSectorCollision(int gameId, int userIndex) {
+        final List<Message<GameTermination>> messages = IntStream.range(0, GameConfig.PLAYERS_NUM).boxed()
+                .map(i -> {
+                    final GameTermination gameTermination = new GameTermination(
+                            false,
+                            CommonFunctions.getCircularOffset(userIndex, -i, GameConfig.PLAYERS_NUM),
+                            System.currentTimeMillis()
+                    );
+                    return new Message<>(WSDict.GAME_TERMINATION, gameTermination);
+                })
+                .collect(Collectors.toList());
+
+        transmitTransformedMessage(gameId, messages);
     }
 
     private <T> void transmitSameMessage(Integer partyId, Message<T> message) {
