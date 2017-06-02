@@ -94,14 +94,14 @@ public class Triangle {
        final double x = point.getEntry(0);
        final double y = point.getEntry(1);
 
-       return y < height * (1 + x / halfWidth);
+       return y <= height * (1 + x / halfWidth);
     }
 
     private boolean underRightSide(RealVector point) {
         final double x = point.getEntry(0);
         final double y = point.getEntry(1);
 
-        return y < height * (1 - x / halfWidth);
+        return y <= height * (1 - x / halfWidth);
     }
 
     private RealVector toBottomCoordinateSystem(RealVector point) {

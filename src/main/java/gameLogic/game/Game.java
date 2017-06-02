@@ -31,9 +31,6 @@ public class Game {
         this.id = id;
         running = true;
 
-        final long timestamp = System.currentTimeMillis();
-        lastUpdateTime = timestamp;
-        lastTransmitTime = timestamp;
         packageCounter = new AtomicInteger();
         messageList = new LinkedList<>();
         init();
@@ -43,6 +40,9 @@ public class Game {
         initWorld();
         setListeners();
 
+        final long timestamp = System.currentTimeMillis();
+        lastUpdateTime = timestamp;
+        lastTransmitTime = timestamp;
     }
 
     public void saveMessage(Message<GameWorldState> message) {

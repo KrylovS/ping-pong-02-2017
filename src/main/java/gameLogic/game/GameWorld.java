@@ -125,13 +125,11 @@ public class GameWorld implements Statefull<GameWorldState> {
 
         final Pair<CollisionInfo, String> firstCollisionData = getFirstCollision(Arrays.asList(
                 new Pair<>(platformCollision, "platform"),
-                new Pair<>(userSectorCollision, "userSector"),
-                new Pair<>(neutralSectorCollision, "neutralSector")
+                new Pair<>(userSectorCollision, "sector"),
+                new Pair<>(neutralSectorCollision, "sector")
         ));
 
         if (firstCollisionData != null) {
-            ball.moveBy(ball.getVelocity().mapMultiply(firstCollisionData.getFirst().getTime()));
-
             switch (firstCollisionData.getSecond()) {
                 case "platform":
                     handlePlatformCollision(
@@ -140,22 +138,25 @@ public class GameWorld implements Statefull<GameWorldState> {
                             firstCollisionData.getFirst().getDirection()
                     );
                     break;
-                case "userSector":
-                    handleUserSectorCollision(
-                            firstCollisionData.getFirst().getObstacle(),
-                            ball,
-                            firstCollisionData.getFirst().getDirection()
-                    );
-                    // todo add event dispatching
-                    break;
-                case "neutralSector":
-                    handleNeutralSectorCollision(
-                            firstCollisionData.getFirst().getObstacle(),
-                            ball,
-                            firstCollisionData.getFirst().getDirection()
-                    );
+                case "sector":
+                    final TriangleField sector = (TriangleField) firstCollisionData.getFirst().getObstacle();
+                    if (sector.getNeutral()) {
+                        handleNeutralSectorCollision(
+                                firstCollisionData.getFirst().getObstacle(),
+                                ball,
+                                firstCollisionData.getFirst().getDirection()
+                        );
+                    } else {
+                        handleUserSectorCollision(
+                                firstCollisionData.getFirst().getObstacle(),
+                                ball,
+                                firstCollisionData.getFirst().getDirection()
+                        );
+                    }
                     break;
             }
+
+            ball.moveBy(ball.getVelocity().mapMultiply(firstCollisionData.getFirst().getTime()));
 
             return firstCollisionData.getFirst().getTime();
         }
