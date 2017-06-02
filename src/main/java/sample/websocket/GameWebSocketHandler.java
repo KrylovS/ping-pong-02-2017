@@ -46,7 +46,7 @@ public class GameWebSocketHandler extends TextWebSocketHandler {
 
         String email = (String) webSocketSession.getAttributes().get(WSDict.SESSION_ATTRIBUTE);
         if (email == null) {
-            email = RandomUtils.getRandomString();
+            email = RandomUtils.getRandomString(12);
             LOGGER.info("Random email generated");
         }
 

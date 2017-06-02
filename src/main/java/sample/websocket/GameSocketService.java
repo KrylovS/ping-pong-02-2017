@@ -67,7 +67,7 @@ public class GameSocketService
 
         if (lobbyState.size() == GameConfig.PLAYERS_NUM) {
             transmitGetReadyMessage(partyId, lobbyState);
-            transmitGameStartMessage(partyId);  // TODO postpone execution
+            transmitGameStartMessage(partyId);
         }
     }
 

@@ -14,4 +14,8 @@ public class RandomUtils {
     public static String getRandomString() {
         return new BigInteger(NUM_BITS, RANDOM).toString(RADIX);
     }
+
+    public static String getRandomString(int numBits) {
+        return new BigInteger(numBits, RANDOM).toString(RADIX);
+    }
 }
