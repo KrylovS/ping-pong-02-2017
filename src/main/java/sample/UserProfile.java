@@ -13,6 +13,7 @@ public class UserProfile {
     private String login;
     private int score;
     private int rating;
+    private int party;
     private long id;
 
     public UserProfile(UserProfile userProfile) {
@@ -22,6 +23,7 @@ public class UserProfile {
         this.id = userProfile.id;
         this.score = userProfile.score;
         this.rating = userProfile.rating;
+        this.party = userProfile.party;
     }
 
     public UserProfile(@JsonProperty("email") String email, @JsonProperty("login") String login,
@@ -64,6 +66,8 @@ public class UserProfile {
         return rating;
     }
 
+    public int getParty() { return party; }
+
     public void setId(long id) {
         this.id = id;
     }
@@ -87,4 +91,6 @@ public class UserProfile {
     public void setRating(int rating) {
         this.rating = rating;
     }
+
+    public void setParty(int party) { this.party = party; }
 }

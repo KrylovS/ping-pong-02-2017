@@ -50,10 +50,14 @@ public class UserController {
         Integer score = scoreService.getScore(httpSession.getId());
         if( score != null) {
             body.setScore(score);
+            body.setParty(score);
+            body.setRating(100 * (int) Math.floor(body.getScore() / body.getParty()));
         } else {
             body.setScore(0);
+            body.setParty(0);
+            body.setRating(0);
         }
-
+        
         final UserProfile userProfile = accountService.register(body);
         if(userProfile != null) {
             httpSession.setAttribute("email", body.getEmail());
