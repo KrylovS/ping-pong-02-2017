@@ -60,6 +60,10 @@ public class Lobby {
         init();
     }
 
+    public String getEmail(int partyId, int playerIndex) {
+        return userPartyMap.get(partyId).inverse().get(playerIndex);
+    }
+
     public List<PlayerAnnouncement> getCurrLobbyState(int gameIndex) {
         return userPartyMap.get(gameIndex).entrySet().stream()
                 .map(entry -> new PlayerAnnouncement(entry.getKey(), entry.getValue()))

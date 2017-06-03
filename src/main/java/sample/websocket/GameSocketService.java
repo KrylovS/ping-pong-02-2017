@@ -71,12 +71,23 @@ public class GameSocketService
         }
     }
 
+    @Nullable
+    public String unregisterUser(int partyId, int userIndex) {
+        final String email = lobby.removePlayer(partyId, userIndex);
+        sessions.remove(email);
+
+        final List<Message<List<PlayerAnnouncement>>> lobbyState = getLobbyState(partyId);
+        transmitTransformedMessage(partyId, lobbyState);
+
+        return email;
+    }
+
     public boolean isConnected(@NotNull String email) {
         return sessions.containsKey(email) && sessions.get(email).isOpen();
     }
 
     @Nullable
-    public String removeUser(@NotNull int partyId, @NotNull int playerId) {
+    public String removeUser(int partyId, int playerId) {
         final String email = lobby.removePlayer(partyId, playerId);
         if (email != null) {
             sessions.remove(email);
