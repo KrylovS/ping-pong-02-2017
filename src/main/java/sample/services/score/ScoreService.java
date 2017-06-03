@@ -40,11 +40,34 @@ public class ScoreService {
         sessionIdtoScore.put(emailToSessionId.get(email), score);
     }
 
-    public Integer getScore(String sessionId) {
+    public Integer getScoreBySession(String sessionId) {
         return sessionIdtoScore.get(sessionId);
     }
 
+    public Integer getScoreByEmail(String email) {
+        return sessionIdtoScore.get(emailToSessionId.get(email));
+    }
+
+    public void removeResultByEmail(String email) {
+        sessionIdtoScore.remove(emailToSessionId.get(email));
+        emailToSessionId.remove(email);
+    }
+
+    public void removeResultBySession(String sessionId) {
+        sessionIdtoScore.remove(sessionId);
+    }
+
+    public void removeEmailToSessionId(String email) {
+        emailToSessionId.remove(email);
+    }
+
+
+
     private void handleScoreMessage(String email, boolean isVictory) {
-        // Logic must be here
+        if (isVictory) {
+            addScore(email, 1);
+        } else {
+            addScore(email, 0);
+        }
     }
 }

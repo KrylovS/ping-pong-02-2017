@@ -47,17 +47,18 @@ public class UserController {
             return new ResponseEntity<>(new ResponseWrapper<>(errorList, null), HttpStatus.BAD_REQUEST);
         }
 
-        Integer score = scoreService.getScore(httpSession.getId());
+        Integer score = scoreService.getScoreBySession(httpSession.getId());
         if( score != null) {
+            scoreService.removeResultBySession(httpSession.getId());
             body.setScore(score);
-            body.setParty(score);
+            body.setParty(1);
             body.setRating(100 * (int) Math.floor(body.getScore() / body.getParty()));
         } else {
             body.setScore(0);
             body.setParty(0);
             body.setRating(0);
         }
-        
+
         final UserProfile userProfile = accountService.register(body);
         if(userProfile != null) {
             httpSession.setAttribute("email", body.getEmail());
@@ -87,8 +88,9 @@ public class UserController {
         if(accountService.login(body.getEmail(), body.getPassword())) {
             final UserProfile user = accountService.getUser(body.getEmail());
 
-            final Integer score = scoreService.getScore(httpSession.getId());
+            final Integer score = scoreService.getScoreBySession(httpSession.getId());
             if( score != null) {
+                scoreService.removeResultBySession(httpSession.getId());
                 user.setScore(score);
                 accountService.updateScore(user);
             }

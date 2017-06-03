@@ -109,13 +109,14 @@ public class GameWebSocketHandler extends TextWebSocketHandler {
         final String email = gameSocketService.removeUser(partyId, playerId);
 
         if (email != null) {
-            final int score = 1; // stub
+            final int score = scoreService.getScoreByEmail(email);
             final UserProfile userProfile = accountServiceDB.getUser(email);
             if (userProfile != null) {
                 userProfile.setScore(score);
                 accountServiceDB.updateScore(userProfile);
+                scoreService.removeResultByEmail(email);
             } else {
-                scoreService.addScore(email, score);
+                scoreService.removeEmailToSessionId(email);
             }
             LOGGER.info("Player " + email + " was successfully removed from the game");
         } else {
